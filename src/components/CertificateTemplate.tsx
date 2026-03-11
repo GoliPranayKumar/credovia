@@ -11,10 +11,10 @@ interface CertificateProps {
 
 export function CertificateTemplate({ name, score, date, certificateId }: CertificateProps) {
   const getSafeBadgeStyles = (s: number) => {
-    if (s >= 80) return { bg: 'rgba(52, 211, 153, 0.1)', text: '#34d399', border: 'rgba(52, 211, 153, 0.2)', label: 'Highly Credible' };
-    if (s >= 60) return { bg: 'rgba(96, 165, 250, 0.1)', text: '#60a5fa', border: 'rgba(96, 165, 250, 0.2)', label: 'Trusted' };
-    if (s >= 40) return { bg: 'rgba(251, 191, 36, 0.1)', text: '#fbbf24', border: 'rgba(251, 191, 36, 0.2)', label: 'Established' };
-    return { bg: 'rgba(248, 113, 113, 0.1)', text: '#f87171', border: 'rgba(248, 113, 113, 0.2)', label: 'Newcomer' };
+    if (s >= 80) return { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)', label: 'Highly Credible' };
+    if (s >= 60) return { bg: 'rgba(139, 92, 246, 0.1)', text: '#8b5cf6', border: 'rgba(139, 92, 246, 0.2)', label: 'Trusted' };
+    if (s >= 40) return { bg: 'rgba(6, 182, 212, 0.1)', text: '#06b6d4', border: 'rgba(6, 182, 212, 0.2)', label: 'Established' };
+    return { bg: 'rgba(244, 63, 94, 0.1)', text: '#f43f5e', border: 'rgba(244, 63, 94, 0.2)', label: 'Newcomer' };
   };
 
   const badge = getSafeBadgeStyles(score);
@@ -28,7 +28,7 @@ export function CertificateTemplate({ name, score, date, certificateId }: Certif
         position: 'relative',
         overflow: 'hidden',
         border: '16px solid #2563eb',
-        backgroundColor: '#f8fafc', 
+        backgroundColor: '#f8fafc',
         fontFamily: 'system-ui, -apple-system, sans-serif',
         display: 'flex',
         flexDirection: 'column',

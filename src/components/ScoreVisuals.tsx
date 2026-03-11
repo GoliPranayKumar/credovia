@@ -2,8 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import { getScoreColor, getScoreLabel } from "@/lib/score";
-import { ShieldCheck, TrendingUp, Zap, Award, BarChart3, Users } from "lucide-react";
+import { ShieldCheck, Zap, Award, Users, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { 
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, 
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip,
+  AreaChart, Area, PieChart, Pie, Cell
+} from 'recharts';
 
 interface ScoreBadgeProps {
   score: number;
@@ -56,12 +61,6 @@ export function ScoreProgress({ score }: { score: number }) {
     </div>
   );
 }
-
-import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip,
-  AreaChart, Area, CartesianGrid
-} from 'recharts';
 
 export function ScoreRadarChart({ breakdown }: { breakdown: any }) {
   const data = [
@@ -142,7 +141,7 @@ export function TrustEvolutionChart() {
               <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
+          <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(37,99,235,0.1)', borderRadius: '12px', fontSize: '10px' }} />
           <Area type="monotone" dataKey="val" stroke="#2563eb" fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
         </AreaChart>
       </ResponsiveContainer>
@@ -158,7 +157,7 @@ export function ParameterGauge({ label, value, max, color }: { label: string, va
   ];
 
   return (
-    <div className="flex flex-col items-center gap-3 p-5 rounded-[2.5rem] bg-secondary/50 border border-border group hover:border-primary transition-all cursor-default">
+    <div className="flex flex-col items-center gap-3 p-5 rounded-[2.5rem] bg-white border border-border/60 group hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/40 transition-all cursor-default">
       <div className="h-[75px] w-[75px] relative shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -199,7 +198,6 @@ export function ScoreGauge({ score }: { score: number }) {
     { name: 'Score', value: score },
     { name: 'Remaining', value: 100 - score },
   ];
-  const COLORS = ['#2563eb', 'rgba(37,99,235,0.03)'];
 
   return (
     <div className="h-[180px] w-[180px] relative">
@@ -216,9 +214,8 @@ export function ScoreGauge({ score }: { score: number }) {
             startAngle={90}
             endAngle={-270}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-            ))}
+            <Cell fill="#2563eb" stroke="none" />
+            <Cell fill="rgba(37,99,235,0.03)" stroke="none" />
           </Pie>
         </PieChart>
       </ResponsiveContainer>
@@ -281,8 +278,5 @@ export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
         </div>
       </div>
     </div>
-
-
   );
 }
-

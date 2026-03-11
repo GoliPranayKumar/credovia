@@ -34,6 +34,11 @@
   --radius-3xl: 1.5rem;
 }
 
+/* Force light mode regardless of system preference */
+:root {
+  color-scheme: light only;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -58,7 +63,4 @@
 .gradient-bg {
   @apply bg-gradient-to-br from-blue-50/50 via-background to-blue-100/30;
 }
-
-
-
 

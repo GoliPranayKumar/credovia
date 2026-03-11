@@ -31,11 +31,11 @@ export default function LoginPage() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-3xl glass border-border/50 space-y-8"
+        className="w-full max-w-md p-8 rounded-3xl bg-white border border-border/60 shadow-xl shadow-blue-100/20 space-y-8"
       >
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-black/5 mb-4 border border-border">
-            <ShieldCheck className="text-primary-foreground w-10 h-10" />
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-blue-500/15 mb-4">
+            <ShieldCheck className="text-white w-10 h-10" />
           </div>
           <h1 className="text-3xl font-black">Welcome Back</h1>
           <p className="text-muted-foreground">Sign in to manage your credibility score</p>
@@ -43,7 +43,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           {error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -55,7 +55,7 @@ export default function LoginPage() {
               <input 
                 type="email" 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -70,7 +70,7 @@ export default function LoginPage() {
               <input 
                 type="password" 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -82,7 +82,7 @@ export default function LoginPage() {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-stone-300 text-primary-foreground font-bold py-4 rounded-2xl shadow-lg shadow-black/5 transition-all active:scale-95 flex items-center justify-center gap-2 border border-border"
+              className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/15 transition-all active:scale-95 flex items-center justify-center gap-2 border border-primary/20"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Sign In <ArrowRight className="w-5 h-5" /></>}
             </button>
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 setEmail("demo@credovia.com");
                 setPassword("password");
               }}
-              className="w-full bg-secondary hover:bg-stone-200 text-foreground font-medium py-3 rounded-2xl border border-border transition-all text-sm"
+              className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 font-medium py-3 rounded-2xl border border-blue-200 transition-all text-sm"
             >
               Autofill Demo Account
             </button>
@@ -100,7 +100,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-muted-foreground">
-          Don't have an account? <Link href="/signup" className="text-stone-600 font-bold hover:underline">Sign up</Link>
+          Don't have an account? <Link href="/signup" className="text-primary font-bold hover:underline">Sign up</Link>
         </p>
       </motion.div>
 

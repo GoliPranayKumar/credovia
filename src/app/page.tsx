@@ -12,7 +12,7 @@ export default function Home() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold mb-4"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-sm font-bold mb-4"
         >
           <Trophy className="w-4 h-4" />
           <span>The Gold Standard for Digital Reputation</span>
@@ -46,7 +46,7 @@ export default function Home() {
         >
           <Link 
             href="/login" 
-            className="w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl shadow-xl shadow-black/5 hover:shadow-black/10 transition-all hover:-translate-y-1 active:scale-95 text-lg border border-border"
+            className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-blue-500/15 hover:shadow-blue-500/25 transition-all hover:-translate-y-1 active:scale-95 text-lg"
           >
             Create Your Profile
           </Link>
@@ -73,19 +73,25 @@ export default function Home() {
             title: "40% Crypto Analysis",
             desc: "On-chain verification of wallet age, transaction frequency, and token diversity via Alchemy.",
             icon: ShieldCheck,
-            color: "text-blue-600"
+            color: "text-blue-600",
+            bg: "bg-blue-50",
+            borderColor: "border-blue-100"
           },
           {
             title: "25% GitHub Presence",
             desc: "Quantitative analysis of repositories, contributions, and account established history.",
             icon: Github,
-            color: "text-blue-700"
+            color: "text-blue-700",
+            bg: "bg-blue-50",
+            borderColor: "border-blue-100"
           },
           {
             title: "Multi-Layer Identity",
             desc: "Weighted scoring including Google Verification (10%), ENS Ownership (10%), and Peer Endorsements.",
             icon: Trophy,
-            color: "text-blue-600"
+            color: "text-blue-600",
+            bg: "bg-blue-50",
+            borderColor: "border-blue-100"
           }
         ].map((f, i) => (
           <motion.div 
@@ -96,7 +102,7 @@ export default function Home() {
             transition={{ delay: i * 0.1 }}
             className="p-8 rounded-3xl glass hover:border-blue-200 transition-colors space-y-4 shadow-sm"
           >
-            <div className={`w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center ${f.color} border border-blue-100 shadow-inner`}>
+            <div className={`w-12 h-12 ${f.bg} rounded-xl flex items-center justify-center ${f.color} border ${f.borderColor} shadow-inner`}>
               <f.icon className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold">{f.title}</h3>

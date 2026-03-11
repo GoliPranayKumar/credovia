@@ -74,11 +74,11 @@ export function calculateCredibilityScore(profile: Profile, reviewCount: number 
 }
 
 export function getScoreColor(score: number): string {
-  if (score >= 90) return "text-indigo-400 border-indigo-400/20 bg-indigo-400/10 shadow-[0_0_15px_rgba(99,102,241,0.2)]";
-  if (score >= 75) return "text-emerald-400 border-emerald-400/20 bg-emerald-400/10";
-  if (score >= 50) return "text-blue-400 border-blue-400/20 bg-blue-400/10";
-  if (score >= 30) return "text-amber-400 border-amber-400/20 bg-amber-400/10";
-  return "text-slate-400 border-slate-500/20 bg-slate-500/10";
+  if (score >= 90) return "text-emerald-500 border-emerald-400/20 bg-emerald-400/10 shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+  if (score >= 75) return "text-violet-500 border-violet-400/20 bg-violet-400/10 shadow-[0_0_10px_rgba(139,92,246,0.15)]";
+  if (score >= 50) return "text-cyan-500 border-cyan-400/20 bg-cyan-400/10";
+  if (score >= 30) return "text-amber-500 border-amber-400/20 bg-amber-400/10";
+  return "text-rose-400 border-rose-400/20 bg-rose-400/10";
 }
 
 export function getScoreLabel(score: number): string {

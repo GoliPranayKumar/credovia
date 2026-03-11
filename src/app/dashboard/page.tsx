@@ -3,12 +3,11 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ScoreBadge, ScoreProgress, ScoreBreakdownView, ScoreGauge } from "@/components/ScoreVisuals";
+import { ScoreProgress, ScoreBreakdownView, ScoreGauge } from "@/components/ScoreVisuals";
 import { 
   Github, 
   Linkedin, 
   Globe, 
-  User as UserIcon, 
   ExternalLink, 
   Edit3, 
   Save, 
@@ -19,7 +18,6 @@ import {
   Award,
   RefreshCw,
   Link as LinkIcon,
-  Zap,
   LayoutDashboard,
   Fingerprint,
   TrendingUp,
@@ -30,7 +28,7 @@ import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
 import { motion, AnimatePresence } from "framer-motion";
 import { CertificateTemplate } from "@/components/CertificateTemplate";
 import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import jsPDF from "jsPDF";
 
 export default function DashboardPage() {
   const { user, profile, loading, logout, refresh } = useAuth();
@@ -103,7 +101,7 @@ export default function DashboardPage() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#fffaf5",
+        backgroundColor: "#faf8ff",
       });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("l", "px", [800, 600]);
@@ -138,7 +136,7 @@ export default function DashboardPage() {
                  Protocol Sync Active
               </div>
               <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
-                 Verification <span className="text-primary italic">Hub</span>
+                  Verification <span className="text-primary italic">Hub</span>
               </h1>
               <p className="text-xs text-muted-foreground leading-relaxed">
                  Manage your digital reputation by authorizing multi-source data extraction. 
@@ -245,7 +243,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Compact Download Card in Sidebar */}
             <div className="w-full pt-4 mt-2">
               <button 
                 onClick={downloadCertificate}
@@ -439,6 +436,5 @@ export default function DashboardPage() {
         </p>
       </footer>
     </div>
-
   );
 }

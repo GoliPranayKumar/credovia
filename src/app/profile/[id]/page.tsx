@@ -86,8 +86,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-12 max-w-5xl mx-auto">
       {/* Profile Header */}
-      <section className="p-8 md:p-12 rounded-[3rem] glass border-white/10 flex flex-col md:flex-row gap-10 items-center md:items-start">
-        <div className="w-40 h-40 rounded-[2.5rem] bg-gradient-to-br from-indigo-500 to-purple-700 flex items-center justify-center text-6xl font-black shadow-2xl shadow-primary/30">
+      <section className="p-8 md:p-12 rounded-[3rem] bg-white border border-border/60 shadow-sm flex flex-col md:flex-row gap-10 items-center md:items-start">
+        <div className="w-40 h-40 rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-6xl font-black text-white shadow-2xl shadow-blue-500/20">
           {profile.name[0]}
         </div>
         
@@ -98,10 +98,10 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
           </div>
           
           <div className="flex flex-wrap justify-center md:justify-start gap-4">
-             {profile.github && <a href={profile.github} target="_blank" className="flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-xl border border-white/5 hover:bg-secondary transition-colors"><Github className="w-5 h-5"/> GitHub</a>}
-             {profile.linkedin && <a href={profile.linkedin} target="_blank" className="flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-xl border border-white/5 hover:bg-secondary transition-colors"><Linkedin className="w-5 h-5"/> LinkedIn</a>}
-             {profile.portfolio && <a href={profile.portfolio} target="_blank" className="flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-xl border border-white/5 hover:bg-secondary transition-colors"><Globe className="w-5 h-5"/> Portfolio</a>}
-             {profile.walletAddress && <div className="flex items-center gap-2 bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20 text-blue-400 font-bold"><ShieldCheck className="w-5 h-5"/> Web3 Verified</div>}
+             {profile.github && <a href={profile.github} target="_blank" className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800"><Github className="w-5 h-5"/> GitHub</a>}
+             {profile.linkedin && <a href={profile.linkedin} target="_blank" className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800"><Linkedin className="w-5 h-5"/> LinkedIn</a>}
+             {profile.portfolio && <a href={profile.portfolio} target="_blank" className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800"><Globe className="w-5 h-5"/> Portfolio</a>}
+             {profile.walletAddress && <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 text-blue-700 font-bold"><ShieldCheck className="w-5 h-5"/> Web3 Verified</div>}
           </div>
 
           <div className="pt-4">
@@ -113,7 +113,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
         {/* Left Column - Score Info */}
         <div className="lg:col-span-2 space-y-8">
-           <div className="p-8 rounded-[2.5rem] glass border-white/10 space-y-6">
+           <div className="p-8 rounded-[2.5rem] bg-white border border-border/60 shadow-sm space-y-6">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                     <ShieldCheck className="w-6 h-6 text-primary" />
                     Authenticity Report
@@ -126,25 +126,25 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
                 <div className="space-y-4 pt-4">
                     <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Identity Verified</span>
-                        <span className="text-emerald-400 font-bold">YES</span>
+                        <span className="text-emerald-600 font-bold">YES</span>
                     </div>
                     {profile.walletAddress && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">On-chain Trust</span>
-                        <span className="text-blue-400 font-bold">ALPHA VERIFIED</span>
+                        <span className="text-blue-600 font-bold">ALPHA VERIFIED</span>
                       </div>
                     )}
                     <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Recent Activity</span>
-                        <span className="text-white font-medium">Standard</span>
+                        <span className="text-foreground font-medium">Standard</span>
                     </div>
                     <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Trust Rank</span>
-                        <span className="text-white font-medium">Top 15%</span>
+                        <span className="text-foreground font-medium">Top 15%</span>
                     </div>
                 </div>
-                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                    <p className="text-[11px] text-primary font-medium italic leading-relaxed">
+                <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                    <p className="text-[11px] text-blue-700 font-medium italic leading-relaxed">
                         "{getScoreDescription(profile.score)}"
                     </p>
                 </div>
@@ -152,42 +152,42 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
 
            {/* Review Form */}
            {user && user.$id !== id && (
-             <motion.div 
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               className="p-8 rounded-[2.5rem] bg-primary/5 border border-primary/20 space-y-6"
-             >
-               <h3 className="text-xl font-bold">Vouch for {profile.name.split(' ')[0]}</h3>
-               <form onSubmit={submitReview} className="space-y-4">
-                 <div className="flex gap-2">
-                   {[1, 2, 3, 4, 5].map((s) => (
-                     <button 
-                       key={s} 
-                       type="button" 
-                       onClick={() => setRating(s)}
-                       className={`p-2 rounded-lg transition-colors ${rating >= s ? "text-amber-400" : "text-muted-foreground"}`}
-                     >
-                       <Star className={`w-6 h-6 ${rating >= s ? "fill-current" : ""}`} />
-                     </button>
-                   ))}
-                 </div>
-                 <textarea 
-                   required
-                   className="w-full bg-secondary/50 border-white/10 rounded-2xl p-4 min-h-[100px] outline-none focus:ring-2 focus:ring-primary transition-all text-sm"
-                   placeholder="Write a trust review..."
-                   value={reviewText}
-                   onChange={(e) => setReviewText(e.target.value)}
-                 />
-                 <button 
-                    type="submit" 
-                    disabled={submitting}
-                    className="w-full bg-primary py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:bg-primary/90 transition-all"
-                 >
-                   {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Post Review</>}
-                 </button>
-               </form>
-             </motion.div>
-           )}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-8 rounded-[2.5rem] bg-blue-50 border border-blue-200 space-y-6"
+              >
+                <h3 className="text-xl font-bold">Vouch for {profile.name.split(' ')[0]}</h3>
+                <form onSubmit={submitReview} className="space-y-4">
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <button 
+                        key={s} 
+                        type="button" 
+                        onClick={() => setRating(s)}
+                        className={`p-2 rounded-lg transition-colors ${rating >= s ? "text-amber-500" : "text-muted-foreground"}`}
+                      >
+                        <Star className={`w-6 h-6 ${rating >= s ? "fill-current" : ""}`} />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea 
+                    required
+                    className="w-full bg-white border border-blue-200 rounded-2xl p-4 min-h-[100px] outline-none focus:ring-2 focus:ring-blue-400 transition-all text-sm"
+                    placeholder="Write a trust review..."
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                  />
+                  <button 
+                     type="submit" 
+                     disabled={submitting}
+                     className="w-full bg-primary text-white py-3 rounded-2xl font-bold shadow-lg shadow-blue-500/15 flex items-center justify-center gap-2 hover:bg-blue-600 transition-all border border-primary/20"
+                  >
+                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Post Review</>}
+                  </button>
+                </form>
+              </motion.div>
+            )}
         </div>
 
         {/* Right Column - Reviews List */}
@@ -197,41 +197,41 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
                 <MessageSquare className="w-8 h-8 text-primary" />
                 Community Trust
               </h3>
-              <span className="bg-secondary px-4 py-1 rounded-full text-sm font-bold border border-white/5">{reviews.length} Reviews</span>
+              <span className="bg-blue-50 px-4 py-1 rounded-full text-sm font-bold border border-blue-200 text-blue-700">{reviews.length} Reviews</span>
            </div>
 
            <div className="space-y-4">
              {reviews.length > 0 ? (
-               reviews.map((r, i) => (
-                 <motion.div 
-                   key={r.$id}
-                   initial={{ opacity: 0, x: 20 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   transition={{ delay: i * 0.1 }}
-                   className="p-6 rounded-[2rem] glass border-white/5 space-y-3"
-                 >
-                   <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center font-bold text-sm">
-                            {(r.reviewerName || "U")[0]}
-                         </div>
-                         <div>
-                            <p className="font-bold text-sm">{r.reviewerName || "Verified User"}</p>
-                            <p className="text-[10px] text-muted-foreground">{new Date(r.$createdAt).toLocaleDateString()}</p>
-                         </div>
-                      </div>
-                      <div className="flex text-amber-500">
-                         {Array.from({ length: r.rating }).map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
-                      </div>
-                   </div>
-                   <p className="text-muted-foreground leading-relaxed italic">"{r.comment}"</p>
-                 </motion.div>
-               ))
-             ) : (
-               <div className="text-center py-12 glass rounded-[2.5rem] border-dashed border-2 border-white/5 opacity-50">
-                  No one has vouched yet. Be the first!
-               </div>
-             )}
+                reviews.map((r, i) => (
+                  <motion.div 
+                    key={r.$id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="p-6 rounded-[2rem] bg-white border border-border/60 hover:border-blue-200 hover:shadow-sm transition-all space-y-3"
+                  >
+                    <div className="flex justify-between items-start">
+                       <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-300 flex items-center justify-center font-bold text-sm text-white">
+                             {(r.reviewerName || "U")[0]}
+                          </div>
+                          <div>
+                             <p className="font-bold text-sm">{r.reviewerName || "Verified User"}</p>
+                             <p className="text-[10px] text-muted-foreground">{new Date(r.$createdAt).toLocaleDateString()}</p>
+                          </div>
+                       </div>
+                       <div className="flex text-amber-500">
+                          {Array.from({ length: r.rating }).map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
+                       </div>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed italic">"{r.comment}"</p>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-12 bg-white rounded-[2.5rem] border-dashed border-2 border-blue-200 opacity-50">
+                   No one has vouched yet. Be the first!
+                </div>
+              )}
            </div>
         </div>
       </div>
