@@ -45,11 +45,11 @@ export function ScoreProgress({ score }: { score: number }) {
           animate={{ width: `${score}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
           className={cn(
-            "h-full rounded-full shadow-[0_0_10px_rgba(249,115,22,0.1)]",
-            score >= 80 ? "bg-gradient-to-r from-orange-600 to-orange-500" :
-            score >= 60 ? "bg-gradient-to-r from-orange-500 to-orange-400" :
-            score >= 40 ? "bg-gradient-to-r from-orange-400 to-orange-300" :
-            "bg-gradient-to-r from-orange-300 to-orange-200"
+            "h-full rounded-full shadow-[0_0_10px_rgba(37,99,235,0.1)]",
+            score >= 80 ? "bg-gradient-to-r from-blue-600 to-blue-500" :
+            score >= 60 ? "bg-gradient-to-r from-blue-500 to-blue-400" :
+            score >= 40 ? "bg-gradient-to-r from-blue-400 to-blue-300" :
+            "bg-gradient-to-r from-blue-300 to-blue-200"
           )}
         />
       </div>
@@ -75,16 +75,16 @@ export function ScoreRadarChart({ breakdown }: { breakdown: any }) {
 
   return (
     <div className="h-[280px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border relative overflow-hidden group">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-          <PolarGrid stroke="rgba(249,115,22,0.05)" />
-          <PolarAngleAxis dataKey="subject" tick={{ fill: '#c2410c', fontSize: 10, fontWeight: 700 }} />
+          <PolarGrid stroke="rgba(37,99,235,0.05)" />
+          <PolarAngleAxis dataKey="subject" tick={{ fill: '#2563eb', fontSize: 10, fontWeight: 700 }} />
           <Radar
             name="Credibility"
             dataKey="A"
-            stroke="#ea580c"
-            fill="#ea580c"
+            stroke="#2563eb"
+            fill="#2563eb"
             fillOpacity={0.3}
           />
         </RadarChart>
@@ -105,16 +105,16 @@ export function ScoreBarComparison({ breakdown }: { breakdown: any }) {
 
   return (
     <div className="h-[250px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border">
-      <h5 className="text-[10px] font-black uppercase text-orange-900/60 mb-4 tracking-widest">Efficiency Ranking</h5>
+      <h5 className="text-[10px] font-black uppercase text-blue-900/60 mb-4 tracking-widest">Efficiency Ranking</h5>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart layout="vertical" data={data} margin={{ left: -20 }}>
           <XAxis type="number" hide domain={[0, 40]} />
-          <YAxis dataKey="name" type="category" tick={{ fill: '#c2410c', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
+          <YAxis dataKey="name" type="category" tick={{ fill: '#2563eb', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
           <Tooltip 
-            cursor={{ fill: 'rgba(249,115,22,0.02)' }}
-            contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(249,115,22,0.1)', borderRadius: '12px', fontSize: '10px' }}
+            cursor={{ fill: 'rgba(37,99,235,0.02)' }}
+            contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(37,99,235,0.1)', borderRadius: '12px', fontSize: '10px' }}
           />
-          <Bar dataKey="current" fill="#f97316" radius={[0, 4, 4, 0]} barSize={12} />
+          <Bar dataKey="current" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={12} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -133,17 +133,17 @@ export function TrustEvolutionChart() {
 
   return (
     <div className="h-[200px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border">
-      <h5 className="text-[10px] font-black uppercase text-orange-900/60 mb-4 tracking-widest">Trust Index Projection</h5>
+      <h5 className="text-[10px] font-black uppercase text-blue-900/60 mb-4 tracking-widest">Trust Index Projection</h5>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ea580c" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#ea580c" stopOpacity={0}/>
+              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
-          <Area type="monotone" dataKey="val" stroke="#ea580c" fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
+          <Area type="monotone" dataKey="val" stroke="#2563eb" fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -174,7 +174,7 @@ export function ParameterGauge({ label, value, max, color }: { label: string, va
               endAngle={-270}
             >
               <Cell fill={color} stroke="none" />
-              <Cell fill="rgba(249,115,22,0.03)" stroke="none" />
+              <Cell fill="rgba(37,99,235,0.03)" stroke="none" />
             </Pie>
           </PieChart>
         </ResponsiveContainer>
@@ -183,7 +183,7 @@ export function ParameterGauge({ label, value, max, color }: { label: string, va
         </div>
       </div>
       <div className="text-center space-y-0.5">
-        <p className="text-[10px] font-black text-orange-900/60 uppercase tracking-widest transition-colors group-hover:text-primary">
+        <p className="text-[10px] font-black text-blue-900/60 uppercase tracking-widest transition-colors group-hover:text-primary">
           {label}
         </p>
         <p className="text-[9px] font-mono text-muted-foreground opacity-50">
@@ -199,7 +199,7 @@ export function ScoreGauge({ score }: { score: number }) {
     { name: 'Score', value: score },
     { name: 'Remaining', value: 100 - score },
   ];
-  const COLORS = ['#ea580c', 'rgba(249,115,22,0.03)'];
+  const COLORS = ['#2563eb', 'rgba(37,99,235,0.03)'];
 
   return (
     <div className="h-[180px] w-[180px] relative">
@@ -224,7 +224,7 @@ export function ScoreGauge({ score }: { score: number }) {
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-5xl font-black text-foreground leading-none tracking-tighter">{score}</span>
-        <span className="text-[11px] text-orange-900/60 uppercase font-black tracking-[0.2em] mt-1">Trust</span>
+        <span className="text-[11px] text-blue-900/60 uppercase font-black tracking-[0.2em] mt-1">Trust</span>
       </div>
     </div>
   );
@@ -232,12 +232,12 @@ export function ScoreGauge({ score }: { score: number }) {
 
 export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
   const items = [
-    { label: "On-Chain", value: breakdown.crypto, max: 40, color: "#ea580c" },
-    { label: "Dev Activity", value: breakdown.github, max: 25, color: "#f97316" },
-    { label: "Identity", value: breakdown.identity, max: 10, color: "#fdba74" },
-    { label: "Domain", value: breakdown.domain, max: 10, color: "#ea580c" },
-    { label: "Behavior", value: breakdown.behavior, max: 10, color: "#f97316" },
-    { label: "Endorsements", value: breakdown.peer, max: 5, color: "#fdba74" },
+    { label: "On-Chain", value: breakdown.crypto, max: 40, color: "#2563eb" },
+    { label: "Dev Activity", value: breakdown.github, max: 25, color: "#3b82f6" },
+    { label: "Identity", value: breakdown.identity, max: 10, color: "#93c5fd" },
+    { label: "Domain", value: breakdown.domain, max: 10, color: "#2563eb" },
+    { label: "Behavior", value: breakdown.behavior, max: 10, color: "#3b82f6" },
+    { label: "Endorsements", value: breakdown.peer, max: 5, color: "#93c5fd" },
   ];
 
   return (
@@ -267,15 +267,15 @@ export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
         <div className="md:col-span-2 bg-white p-6 rounded-[2.5rem] border border-border shadow-sm">
           <TrustEvolutionChart />
         </div>
-        <div className="bg-orange-50 rounded-[2.5rem] border border-orange-100 p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-sm">
-           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-inner border border-orange-100">
-              <Zap className="w-8 h-8 text-orange-600" />
+        <div className="bg-blue-50 rounded-[2.5rem] border border-blue-100 p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-sm">
+           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-inner border border-blue-100">
+              <Zap className="w-8 h-8 text-blue-600" />
            </div>
            <div className="space-y-1">
-              <h4 className="text-xl font-black text-orange-900">AI Insight</h4>
-              <p className="text-[10px] text-orange-900/60 uppercase tracking-widest font-black">Predicted Growth</p>
+              <h4 className="text-xl font-black text-blue-900">AI Insight</h4>
+              <p className="text-[10px] text-blue-900/60 uppercase tracking-widest font-black">Predicted Growth</p>
            </div>
-           <p className="text-xs text-orange-800 leading-relaxed">
+           <p className="text-xs text-blue-800 leading-relaxed">
               Based on your consistency, your protocol rank is projected to increase by <strong>12%</strong> in the next 30 days.
            </p>
         </div>

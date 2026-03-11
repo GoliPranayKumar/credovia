@@ -56,14 +56,14 @@ export default function Navbar() {
           {user ? (
             <Link 
               href="/dashboard" 
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white"
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white"
             >
               {user.name?.[0] || "U"}
             </Link>
           ) : (
             <Link 
               href="/login" 
-              className="bg-primary hover:bg-orange-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-sm transition-all active:scale-95 border border-primary/20"
+              className="bg-primary hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-sm transition-all active:scale-95 border border-primary/20"
             >
               Get Started
             </Link>

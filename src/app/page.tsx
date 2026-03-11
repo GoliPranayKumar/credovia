@@ -52,17 +52,17 @@ export default function Home() {
           </Link>
           <Link 
             href="/search" 
-            className="w-full sm:w-auto px-8 py-4 bg-secondary border border-border text-foreground font-bold rounded-2xl hover:bg-orange-50 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 text-lg shadow-sm"
+            className="w-full sm:w-auto px-8 py-4 bg-secondary border border-border text-foreground font-bold rounded-2xl hover:bg-blue-50 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 text-lg shadow-sm"
           >
-            <Search className="w-5 h-5 text-orange-600" />
+            <Search className="w-5 h-5 text-blue-600" />
             Find Users
           </Link>
         </motion.div>
 
         {/* Floating Icons background effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-full max-w-4xl opacity-10 blur-3xl pointer-events-none text-orange-300">
-          <div className="absolute top-0 left-1/4 w-72 h-72 bg-orange-200 rounded-full" />
-          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-red-100 rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-full max-w-4xl opacity-10 blur-3xl pointer-events-none text-blue-300">
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-200 rounded-full" />
+          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-indigo-100 rounded-full" />
         </div>
       </section>
 
@@ -73,19 +73,19 @@ export default function Home() {
             title: "40% Crypto Analysis",
             desc: "On-chain verification of wallet age, transaction frequency, and token diversity via Alchemy.",
             icon: ShieldCheck,
-            color: "text-orange-600"
+            color: "text-blue-600"
           },
           {
             title: "25% GitHub Presence",
             desc: "Quantitative analysis of repositories, contributions, and account established history.",
             icon: Github,
-            color: "text-orange-700"
+            color: "text-blue-700"
           },
           {
             title: "Multi-Layer Identity",
             desc: "Weighted scoring including Google Verification (10%), ENS Ownership (10%), and Peer Endorsements.",
             icon: Trophy,
-            color: "text-orange-600"
+            color: "text-blue-600"
           }
         ].map((f, i) => (
           <motion.div 
@@ -94,9 +94,9 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="p-8 rounded-3xl glass hover:border-orange-200 transition-colors space-y-4 shadow-sm"
+            className="p-8 rounded-3xl glass hover:border-blue-200 transition-colors space-y-4 shadow-sm"
           >
-            <div className={`w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center ${f.color} border border-orange-100 shadow-inner`}>
+            <div className={`w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center ${f.color} border border-blue-100 shadow-inner`}>
               <f.icon className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold">{f.title}</h3>
