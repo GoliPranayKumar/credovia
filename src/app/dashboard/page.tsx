@@ -103,7 +103,7 @@ export default function DashboardPage() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#fffaf5",
+        backgroundColor: "#faf8ff",
       });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("l", "px", [800, 600]);
