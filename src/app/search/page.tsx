@@ -51,13 +51,13 @@ export default function SearchPage() {
       </div>
 
       <form onSubmit={handleSearch} className="relative group">
-        <div className="absolute inset-x-0 -bottom-2 h-4 bg-primary/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+        <div className="absolute inset-x-0 -bottom-2 h-4 bg-violet-400/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
         <div className="relative flex gap-4">
           <div className="relative flex-1">
             <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
             <input 
               type="text" 
-              className="w-full bg-secondary/80 backdrop-blur-xl border border-white/10 rounded-[2rem] py-6 pl-16 pr-6 focus:ring-4 focus:ring-primary/20 outline-none transition-all text-xl font-medium"
+              className="w-full bg-white border border-border rounded-[2rem] py-6 pl-16 pr-6 focus:ring-4 focus:ring-violet-200 focus:border-violet-300 outline-none transition-all text-xl font-medium shadow-sm"
               placeholder="Search for a name..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -65,7 +65,7 @@ export default function SearchPage() {
           </div>
           <button 
             type="submit"
-            className="px-8 py-6 bg-primary text-white font-bold rounded-[2rem] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all text-xl"
+            className="px-8 py-6 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold rounded-[2rem] shadow-xl shadow-violet-500/15 hover:scale-[1.02] active:scale-95 transition-all text-xl"
           >
             Search
           </button>
@@ -79,7 +79,7 @@ export default function SearchPage() {
         
         {loading ? (
           <div className="flex justify-center p-12">
-            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <Loader2 className="w-12 h-12 animate-spin text-violet-500" />
           </div>
         ) : users.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
@@ -92,28 +92,28 @@ export default function SearchPage() {
               >
                 <Link 
                   href={`/profile/${u.$id}`}
-                  className="group flex flex-col md:flex-row items-center justify-between p-6 rounded-3xl glass hover:bg-white/5 border-white/5 transition-all"
+                  className="group flex flex-col md:flex-row items-center justify-between p-6 rounded-3xl bg-white border border-border/60 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/30 transition-all"
                 >
                   <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-indigo-900/50 flex items-center justify-center text-2xl font-black text-white group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-2xl font-black text-white group-hover:scale-110 transition-transform shadow-md">
                       {u.name[0]}
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold group-hover:text-primary transition-colors">{u.name}</h4>
+                      <h4 className="text-xl font-bold group-hover:text-violet-600 transition-colors">{u.name}</h4>
                       <p className="text-sm text-muted-foreground line-clamp-1 max-w-xs">{u.bio || "No bio provided"}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-6 mt-4 md:mt-0">
                     <ScoreBadge score={u.score} />
-                    <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-white group-hover:translate-x-2 transition-all" />
+                    <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-violet-600 group-hover:translate-x-2 transition-all" />
                   </div>
                 </Link>
               </motion.div>
             ))}
           </div>
         ) : (
-          <div className="text-center p-20 glass rounded-[3rem] border-dashed border-2 border-white/5">
+          <div className="text-center p-20 bg-white rounded-[3rem] border-dashed border-2 border-violet-200">
             <User className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-20" />
             <p className="text-xl text-muted-foreground">No users found match your search.</p>
           </div>

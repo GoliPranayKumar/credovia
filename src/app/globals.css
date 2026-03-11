@@ -1,37 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: hsl(30 30% 99%);
-  --color-foreground: hsl(25 20% 12%);
+  --color-background: hsl(250 20% 99%);
+  --color-foreground: hsl(250 25% 12%);
   
   --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(25 20% 12%);
+  --color-card-foreground: hsl(250 25% 12%);
   
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(25 20% 12%);
+  --color-popover-foreground: hsl(250 25% 12%);
   
-  --color-primary: hsl(24 95% 50%);
+  --color-primary: hsl(262 83% 58%);
   --color-primary-foreground: hsl(0 0% 100%);
   
-  --color-secondary: hsl(25 40% 96%);
-  --color-secondary-foreground: hsl(24 20% 12%);
+  --color-secondary: hsl(250 30% 96%);
+  --color-secondary-foreground: hsl(250 25% 12%);
   
-  --color-muted: hsl(24 20% 97%);
-  --color-muted-foreground: hsl(24 10% 45%);
+  --color-muted: hsl(250 15% 95%);
+  --color-muted-foreground: hsl(250 10% 45%);
   
-  --color-accent: hsl(24 95% 95%);
-  --color-accent-foreground: hsl(24 95% 50%);
+  --color-accent: hsl(262 83% 95%);
+  --color-accent-foreground: hsl(262 83% 58%);
   
   --color-destructive: hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(0 0% 98%);
   
-  --color-border: hsl(24 20% 90%);
-  --color-input: hsl(24 20% 90%);
-  --color-ring: hsl(24 95% 50%);
+  --color-border: hsl(250 15% 90%);
+  --color-input: hsl(250 15% 90%);
+  --color-ring: hsl(262 83% 58%);
   
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
   --radius-3xl: 1.5rem;
+}
+
+/* Force light mode regardless of system preference */
+:root {
+  color-scheme: light only;
 }
 
 @layer base {
@@ -45,19 +50,16 @@
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(249, 115, 22, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.08);
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-500 bg-clip-text text-transparent;
 }
 
 .gradient-bg {
-  @apply bg-gradient-to-br from-orange-50/50 via-background to-orange-100/30;
+  @apply bg-gradient-to-br from-violet-50/30 via-background to-cyan-50/20;
 }
-
-
-

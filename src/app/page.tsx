@@ -12,7 +12,7 @@ export default function Home() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold mb-4"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-sm font-bold mb-4"
         >
           <Trophy className="w-4 h-4" />
           <span>The Gold Standard for Digital Reputation</span>
@@ -46,23 +46,23 @@ export default function Home() {
         >
           <Link 
             href="/login" 
-            className="w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl shadow-xl shadow-black/5 hover:shadow-black/10 transition-all hover:-translate-y-1 active:scale-95 text-lg border border-border"
+            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold rounded-2xl shadow-xl shadow-violet-500/15 hover:shadow-violet-500/25 transition-all hover:-translate-y-1 active:scale-95 text-lg"
           >
             Create Your Profile
           </Link>
           <Link 
             href="/search" 
-            className="w-full sm:w-auto px-8 py-4 bg-secondary border border-border text-foreground font-bold rounded-2xl hover:bg-orange-50 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 text-lg shadow-sm"
+            className="w-full sm:w-auto px-8 py-4 bg-white border border-violet-200 text-foreground font-bold rounded-2xl hover:bg-violet-50 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 text-lg shadow-sm"
           >
-            <Search className="w-5 h-5 text-orange-600" />
+            <Search className="w-5 h-5 text-violet-600" />
             Find Users
           </Link>
         </motion.div>
 
         {/* Floating Icons background effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-full max-w-4xl opacity-10 blur-3xl pointer-events-none text-orange-300">
-          <div className="absolute top-0 left-1/4 w-72 h-72 bg-orange-200 rounded-full" />
-          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-red-100 rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-full max-w-4xl opacity-10 blur-3xl pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-violet-300 rounded-full" />
+          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-cyan-200 rounded-full" />
         </div>
       </section>
 
@@ -73,19 +73,25 @@ export default function Home() {
             title: "40% Crypto Analysis",
             desc: "On-chain verification of wallet age, transaction frequency, and token diversity via Alchemy.",
             icon: ShieldCheck,
-            color: "text-orange-600"
+            color: "text-cyan-600",
+            bg: "bg-cyan-50",
+            borderColor: "border-cyan-100"
           },
           {
             title: "25% GitHub Presence",
             desc: "Quantitative analysis of repositories, contributions, and account established history.",
             icon: Github,
-            color: "text-orange-700"
+            color: "text-violet-600",
+            bg: "bg-violet-50",
+            borderColor: "border-violet-100"
           },
           {
             title: "Multi-Layer Identity",
             desc: "Weighted scoring including Google Verification (10%), ENS Ownership (10%), and Peer Endorsements.",
             icon: Trophy,
-            color: "text-orange-600"
+            color: "text-emerald-600",
+            bg: "bg-emerald-50",
+            borderColor: "border-emerald-100"
           }
         ].map((f, i) => (
           <motion.div 
@@ -94,9 +100,9 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="p-8 rounded-3xl glass hover:border-orange-200 transition-colors space-y-4 shadow-sm"
+            className="p-8 rounded-3xl bg-white border border-border/60 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/40 transition-all space-y-4 shadow-sm"
           >
-            <div className={`w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center ${f.color} border border-orange-100 shadow-inner`}>
+            <div className={`w-12 h-12 ${f.bg} rounded-xl flex items-center justify-center ${f.color} border ${f.borderColor} shadow-inner`}>
               <f.icon className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold">{f.title}</h3>
