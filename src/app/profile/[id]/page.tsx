@@ -19,6 +19,7 @@ import { databases, DATABASE_ID, USERS_COLLECTION_ID, REVIEWS_COLLECTION_ID } fr
 import { ID, Query } from "appwrite";
 import { motion } from "framer-motion";
 import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
+import { VerificationBadges } from "@/components/VerificationBadges";
 
 export default function PublicProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -102,6 +103,11 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
              {profile.linkedin && <a href={profile.linkedin} target="_blank" className="flex items-center gap-2 bg-cyan-50 px-4 py-2 rounded-xl border border-cyan-200 hover:bg-cyan-100 transition-colors text-cyan-800"><Linkedin className="w-5 h-5"/> LinkedIn</a>}
              {profile.portfolio && <a href={profile.portfolio} target="_blank" className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors text-emerald-800"><Globe className="w-5 h-5"/> Portfolio</a>}
              {profile.walletAddress && <div className="flex items-center gap-2 bg-cyan-50 px-4 py-2 rounded-xl border border-cyan-200 text-cyan-700 font-bold"><ShieldCheck className="w-5 h-5"/> Web3 Verified</div>}
+          </div>
+
+          {/* Verification Badges */}
+          <div className="pt-2">
+            <VerificationBadges profile={profile} />
           </div>
 
           <div className="pt-4">

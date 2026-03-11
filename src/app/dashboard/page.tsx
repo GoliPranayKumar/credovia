@@ -23,14 +23,18 @@ import {
   LayoutDashboard,
   Fingerprint,
   TrendingUp,
-  Users
+  Users,
+  Share2
 } from "lucide-react";
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite";
 import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
 import { motion, AnimatePresence } from "framer-motion";
 import { CertificateTemplate } from "@/components/CertificateTemplate";
+import { ShareScoreCard } from "@/components/ShareScoreCard";
+import { AchievementBadges } from "@/components/AchievementBadges";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { getScoreLabel } from "@/lib/score";
 
 export default function DashboardPage() {
   const { user, profile, loading, logout, refresh } = useAuth();
@@ -115,6 +119,26 @@ export default function DashboardPage() {
     }
   };
 
+  const downloadScoreCard = async () => {
+    const element = document.getElementById("credovia-share-card");
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+      });
+      const link = document.createElement("a");
+      link.download = `Credovia_ScoreCard_${profile.name.replace(/\s+/g, '_')}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("Score Card Generation Error:", err);
+      alert("Failed to generate score card.");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 text-foreground">
       {/* Hidden Certificate */}
@@ -124,6 +148,12 @@ export default function DashboardPage() {
           score={profile.score} 
           date={new Date().toLocaleDateString()} 
           certificateId={`CR-${profile.$id.slice(0, 8).toUpperCase()}`}
+        />
+        <ShareScoreCard
+          name={profile.name}
+          score={profile.score}
+          scoreLabel={getScoreLabel(profile.score)}
+          breakdown={calculateCredibilityScore(profile).breakdown}
         />
       </div>
 
@@ -246,7 +276,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Compact Download Card in Sidebar */}
-            <div className="w-full pt-4 mt-2">
+            <div className="w-full pt-4 mt-2 space-y-3">
               <button 
                 onClick={downloadCertificate}
                  className="w-full flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-black rounded-2xl shadow-sm hover:-translate-y-0.5 active:scale-95 transition-all group relative overflow-hidden border border-violet-500/20"
@@ -254,6 +284,15 @@ export default function DashboardPage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 <Award className="w-4 h-4 group-hover:rotate-12 transition-transform" /> 
                 <span className="text-xs uppercase tracking-widest">Download Certificate</span>
+                <Download className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={downloadScoreCard}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-rose-500 via-pink-500 to-violet-500 text-white font-black rounded-2xl shadow-sm hover:-translate-y-0.5 active:scale-95 transition-all group relative overflow-hidden border border-rose-500/20"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <Share2 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                <span className="text-xs uppercase tracking-widest">Share Score Card</span>
                 <Download className="w-4 h-4" />
               </button>
               <p className="text-[8px] text-muted-foreground mt-3 font-bold uppercase tracking-widest opacity-40">
@@ -431,6 +470,13 @@ export default function DashboardPage() {
         </main>
       </div>
 
+
+      {/* Achievement Badges */}
+      <AchievementBadges 
+        score={profile.score} 
+        profile={profile} 
+        breakdown={calculateCredibilityScore(profile).breakdown} 
+      />
 
       {/* Footer Meta */}
       <footer className="pt-8 text-center pb-12 border-t border-border mx-10">

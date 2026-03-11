@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { User, ShieldCheck, Search, LayoutDashboard, LogOut } from "lucide-react";
+import { User, ShieldCheck, Search, LayoutDashboard, LogOut, Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { account } from "@/lib/appwrite";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     account.get()
@@ -52,11 +54,27 @@ export default function Navbar() {
           })}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="relative w-10 h-10 rounded-xl border border-border/60 bg-secondary/50 hover:bg-secondary flex items-center justify-center transition-all active:scale-90 group overflow-hidden"
+            aria-label="Toggle theme"
+          >
+            <Sun className={cn(
+              "w-[18px] h-[18px] text-amber-500 absolute transition-all duration-300",
+              theme === "dark" ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
+            )} />
+            <Moon className={cn(
+              "w-[18px] h-[18px] text-violet-400 absolute transition-all duration-300",
+              theme === "dark" ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
+            )} />
+          </button>
+
           {user ? (
             <Link 
               href="/dashboard" 
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white"
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white dark:border-gray-800"
             >
               {user.name?.[0] || "U"}
             </Link>
