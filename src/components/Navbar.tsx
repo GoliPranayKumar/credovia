@@ -23,16 +23,16 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10 px-6 py-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50 px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-lg shadow-primary/20">
-            <ShieldCheck className="text-white w-6 h-6" />
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-lg shadow-black/5">
+            <ShieldCheck className="text-primary-foreground w-6 h-6" />
           </div>
           <span className="text-xl font-bold tracking-tight">Credo<span className="text-primary">via</span></span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-8 text-foreground">
           {navItems.map((item) => {
             if (item.protected && !user) return null;
             const Icon = item.icon;
@@ -56,19 +56,21 @@ export default function Navbar() {
           {user ? (
             <Link 
               href="/dashboard" 
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-[14px] font-black text-white shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all border-2 border-white/10"
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white"
             >
               {user.name?.[0] || "U"}
             </Link>
           ) : (
             <Link 
               href="/login" 
-              className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-95"
+              className="bg-primary hover:bg-orange-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-sm transition-all active:scale-95 border border-primary/20"
             >
               Get Started
             </Link>
           )}
         </div>
+
+
       </div>
     </nav>
   );

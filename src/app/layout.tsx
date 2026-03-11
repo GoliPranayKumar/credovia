@@ -22,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} gradient-bg min-h-screen text-slate-50 antialiased`}>
+    <html lang="en">
+      <body className={`${inter.className} gradient-bg min-h-screen antialiased`}>
         <Navbar />
         <main className="pt-24 pb-12 px-6">
           <div className="max-w-7xl mx-auto">
@@ -34,3 +34,4 @@ export default function RootLayout({
     </html>
   );
 }
+

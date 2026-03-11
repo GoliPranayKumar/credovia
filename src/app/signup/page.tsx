@@ -32,11 +32,11 @@ export default function SignupPage() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-3xl glass border-white/10 space-y-8"
+        className="w-full max-w-md p-8 rounded-3xl glass border-border/50 space-y-8"
       >
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-primary/20 mb-4">
-            <ShieldCheck className="text-white w-10 h-10" />
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-black/5 mb-4 border border-border">
+            <ShieldCheck className="text-primary-foreground w-10 h-10" />
           </div>
           <h1 className="text-3xl font-black">Create Account</h1>
           <p className="text-muted-foreground">Start building your digital reputation</p>
@@ -56,7 +56,7 @@ export default function SignupPage() {
               <input 
                 type="text" 
                 required
-                className="w-full bg-secondary border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -71,7 +71,7 @@ export default function SignupPage() {
               <input 
                 type="email" 
                 required
-                className="w-full bg-secondary border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -86,7 +86,7 @@ export default function SignupPage() {
               <input 
                 type="password" 
                 required
-                className="w-full bg-secondary border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -97,16 +97,17 @@ export default function SignupPage() {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+            className="w-full bg-primary hover:bg-stone-300 text-primary-foreground font-bold py-4 rounded-2xl shadow-lg shadow-black/5 transition-all active:scale-95 flex items-center justify-center gap-2 border border-border"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Get Started <ArrowRight className="w-5 h-5" /></>}
           </button>
         </form>
 
         <p className="text-center text-muted-foreground">
-          Already have an account? <Link href="/login" className="text-primary font-bold hover:underline">Sign in</Link>
+          Already have an account? <Link href="/login" className="text-stone-600 font-bold hover:underline">Sign in</Link>
         </p>
       </motion.div>
+
     </div>
   );
 }

@@ -103,7 +103,7 @@ export default function DashboardPage() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#020617",
+        backgroundColor: "#fffaf5",
       });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("l", "px", [800, 600]);
@@ -116,7 +116,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 text-foreground">
       {/* Hidden Certificate */}
       <div className="fixed overflow-hidden h-0 w-0 pointer-events-none opacity-0">
         <CertificateTemplate 
@@ -128,16 +128,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Top Section: Verification Hub (Full Width) */}
-      <section className="relative overflow-hidden p-6 md:p-10 rounded-[2.5rem] glass border-white/10 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+      <section className="relative overflow-hidden p-6 md:p-10 rounded-[2.5rem] glass border-border/50 bg-gradient-to-br from-orange-50/50 via-transparent to-red-50/10">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-orange-100/50 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-900 text-[10px] font-black uppercase tracking-widest">
                  <ShieldCheck className="w-3 h-3" />
                  Protocol Sync Active
               </div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
                  Verification <span className="text-primary italic">Hub</span>
               </h1>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -149,7 +149,7 @@ export default function DashboardPage() {
            <div className="flex flex-wrap gap-3">
                <button 
                   onClick={() => setIsEditing(!isEditing)}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-white text-black text-sm font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 shadow-xl"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-orange-600 transition-all active:scale-95 shadow-sm border border-primary/20"
                >
                   {isEditing ? <><Save className="w-5 h-5" /> Save Changes</> : <><Edit3 className="w-5 h-5" /> Edit Profile</>}
                </button>
@@ -164,29 +164,29 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
            {[
-             { name: "Alchemy / Web3", desc: "Digital Assets", icon: LinkIcon, color: "text-blue-400", val: profile.walletAddress },
-             { name: "GitHub SSO", desc: "Dev Activity", icon: Github, color: "text-purple-400", val: profile.github },
-             { name: "Official Domain", desc: "DNS & Web", icon: Globe, color: "text-emerald-400", val: profile.portfolio }
+             { name: "Alchemy / Web3", desc: "Digital Assets", icon: LinkIcon, color: "text-orange-700", val: profile.walletAddress },
+             { name: "GitHub SSO", desc: "Dev Activity", icon: Github, color: "text-orange-800", val: profile.github },
+             { name: "Official Domain", desc: "DNS & Web", icon: Globe, color: "text-orange-700", val: profile.portfolio }
            ].map((platform, i) => (
-              <div key={i} className="p-5 rounded-[2rem] bg-secondary/20 border border-white/5 space-y-4 hover:bg-secondary/40 transition-all group">
+              <div key={i} className="p-5 rounded-[2rem] bg-white border border-border space-y-4 hover:bg-orange-50 transition-all group shadow-sm">
                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-2xl bg-secondary ${platform.color} border border-white/5 shadow-inner`}>
+                    <div className={`p-3 rounded-2xl bg-orange-50 ${platform.color} border border-orange-100 shadow-inner`}>
                        <platform.icon className="w-5 h-5" />
                     </div>
-                    <div className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${platform.val ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-slate-500/10 border-slate-500/20 text-slate-500"} uppercase`}>
+                    <div className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${platform.val ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-orange-100 border-orange-200 text-orange-700"} uppercase`}>
                        {platform.val ? "Verified" : "Pending"}
                     </div>
                  </div>
                  <div className="space-y-0.5">
-                    <h3 className="text-sm font-black">{platform.name}</h3>
+                    <h3 className="text-sm font-black text-foreground">{platform.name}</h3>
                     <p className="text-[10px] text-muted-foreground opacity-70 italic">{platform.desc}</p>
                  </div>
                  <button 
                   onClick={() => handleSync(platform.name)}
                   disabled={syncing === platform.name}
-                  className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2.5 bg-orange-50/50 hover:bg-orange-100 border border-orange-100 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all text-orange-800"
                  >
-                    {syncing === platform.name ? <RefreshCw className="w-3 h-3 animate-spin text-primary" /> : <RefreshCw className="w-3 h-3" />}
+                    {syncing === platform.name ? <RefreshCw className="w-3 h-3 animate-spin text-orange-600" /> : <RefreshCw className="w-3 h-3" />}
                     Authorize & Sync
                  </button>
               </div>
@@ -199,46 +199,46 @@ export default function DashboardPage() {
         
         {/* Identity & Reputation Card (Left / 4 cols) */}
         <aside className="lg:col-span-4 space-y-6">
-          <section className="p-6 md:p-8 rounded-[2.5rem] glass border-white/10 bg-secondary/5 space-y-6 flex flex-col items-center text-center">
+          <section className="p-6 md:p-8 rounded-[2.5rem] glass border-border bg-white space-y-6 flex flex-col items-center text-center shadow-sm">
             <div className="space-y-1">
-              <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Live Reputation</h3>
-              <h2 className="text-xl font-black">Score Matrix</h2>
+              <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-orange-600/60">Live Reputation</h3>
+              <h2 className="text-xl font-black text-foreground">Score Matrix</h2>
             </div>
             
             <div className="relative">
               <ScoreGauge score={profile.score} />
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-secondary border border-white/10 px-3 py-1 rounded-full shadow-2xl flex items-center gap-2">
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white border border-border px-3 py-1 rounded-full shadow-lg flex items-center gap-2">
                  <Fingerprint className="w-2.5 h-2.5 text-primary" />
-                 <span className="text-[9px] font-black uppercase tracking-widest">Identity PK</span>
+                 <span className="text-[9px] font-black uppercase tracking-widest text-foreground">Identity PK</span>
               </div>
             </div>
 
             <div className="w-full space-y-4">
               <ScoreProgress score={profile.score} />
-              <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 italic text-[10px] text-muted-foreground leading-relaxed">
+              <div className="p-3 rounded-xl bg-orange-50/30 border border-orange-100 italic text-[10px] text-muted-foreground leading-relaxed">
                  "{getScoreDescription(profile.score)}"
               </div>
             </div>
 
-            <div className="w-full pt-4 border-t border-white/5 space-y-3 text-left">
-              <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-2">Verified Connections</h4>
+            <div className="w-full pt-4 border-t border-border space-y-3 text-left">
+              <h4 className="text-[9px] font-black uppercase tracking-widest text-orange-600/40 px-2">Verified Connections</h4>
               <div className="grid grid-cols-1 gap-2">
                 {[
-                  { label: "GitHub", val: profile.github, icon: Github, color: "text-purple-400" },
-                  { label: "LinkedIn", val: profile.linkedin, icon: Linkedin, color: "text-blue-400" },
-                  { label: "Web3", val: profile.walletAddress, icon: ShieldCheck, color: "text-emerald-400" },
+                  { label: "GitHub", val: profile.github, icon: Github, color: "text-orange-800" },
+                  { label: "LinkedIn", val: profile.linkedin, icon: Linkedin, color: "text-orange-700" },
+                  { label: "Web3", val: profile.walletAddress, icon: ShieldCheck, color: "text-orange-800" },
                 ].map((link, i) => (
-                  <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 group hover:bg-white/[0.05] transition-all">
+                  <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-orange-50/20 border border-border group hover:bg-orange-50 transition-all">
                     <div className="flex items-center gap-3">
                       <link.icon className={`w-3.5 h-3.5 ${link.color}`} />
-                      <span className="text-[11px] font-bold text-slate-300">{link.label}</span>
+                      <span className="text-[11px] font-bold text-foreground">{link.label}</span>
                     </div>
                     {link.val ? (
-                      <a href={link.val} target="_blank" rel="noreferrer" className="p-1 px-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all">
+                      <a href={link.val} target="_blank" rel="noreferrer" className="p-1 px-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all border border-emerald-500/20">
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     ) : (
-                      <span className="text-[9px] text-slate-600 font-bold uppercase">Null</span>
+                      <span className="text-[9px] text-orange-200 font-bold uppercase">Null</span>
                     )}
                   </div>
                 ))}
@@ -249,7 +249,7 @@ export default function DashboardPage() {
             <div className="w-full pt-4 mt-2">
               <button 
                 onClick={downloadCertificate}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 active:scale-95 transition-all group group relative overflow-hidden"
+                className="w-full flex items-center justify-center gap-3 py-4 bg-primary text-white font-black rounded-2xl shadow-sm hover:translate-y-1 active:scale-95 transition-all group relative overflow-hidden border border-primary/20"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 <Award className="w-4 h-4 group-hover:rotate-12 transition-transform" /> 
@@ -262,14 +262,14 @@ export default function DashboardPage() {
             </div>
 
             {/* Space Filler: Protocol Rank & Health */}
-            <div className="w-full mt-4 p-6 rounded-[2rem] bg-gradient-to-br from-primary/5 to-transparent border border-white/5 space-y-5">
+            <div className="w-full mt-4 p-6 rounded-[2rem] bg-gradient-to-br from-orange-50 to-transparent border border-orange-100 space-y-5">
                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
                   </div>
                   <div className="space-y-0.5">
-                     <h4 className="text-[10px] font-black uppercase tracking-widest text-white">Trust Health</h4>
-                     <p className="text-[8px] text-emerald-400/60 font-black uppercase">Optimized & Secure</p>
+                     <h4 className="text-[10px] font-black uppercase tracking-widest text-foreground">Trust Health</h4>
+                     <p className="text-[8px] text-emerald-600 font-black uppercase">Optimized & Secure</p>
                   </div>
                </div>
 
@@ -281,17 +281,17 @@ export default function DashboardPage() {
                   ].map((stat, i) => (
                     <div key={i} className="flex items-center justify-between group">
                        <div className="flex items-center gap-2">
-                          <stat.icon className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{stat.label}</span>
+                          <stat.icon className="w-3 h-3 text-orange-400 group-hover:text-orange-700 transition-colors" />
+                          <span className="text-[9px] font-bold text-orange-800/60 uppercase tracking-tighter">{stat.label}</span>
                        </div>
-                       <span className="text-[10px] font-black text-white">{stat.val}</span>
+                       <span className="text-[10px] font-black text-foreground">{stat.val}</span>
                     </div>
                   ))}
                </div>
 
-               <div className="pt-4 border-t border-white/5">
-                  <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                     <div className="h-full w-full bg-gradient-to-r from-emerald-500 to-primary animate-pulse" />
+               <div className="pt-4 border-t border-orange-100">
+                  <div className="h-1.5 w-full bg-orange-100 rounded-full overflow-hidden border border-orange-200">
+                     <div className="h-full w-full bg-gradient-to-r from-emerald-500 to-orange-500" />
                   </div>
                   <p className="text-[7px] text-center mt-2 text-muted-foreground uppercase font-black tracking-[0.3em]">Institutional Verification Ready</p>
                </div>
@@ -309,28 +309,28 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 onSubmit={handleSave} 
-                className="p-8 rounded-[2.5rem] glass border-white/10 space-y-6 shadow-2xl"
+                className="p-8 rounded-[2.5rem] glass border-border bg-white space-y-6 shadow-sm"
               >
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-black">Meta Update</h3>
+                  <h3 className="text-2xl font-black text-foreground">Meta Update</h3>
                   <p className="text-xs text-muted-foreground">Modify protocol parameters.</p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-orange-700 ml-1">Name</label>
                     <input 
                       type="text" 
-                      className="w-full bg-secondary/50 border border-white/10 rounded-xl py-3 px-5 focus:ring-1 focus:ring-primary outline-none transition-all text-white font-bold text-sm"
+                      className="w-full bg-orange-50/30 border border-border rounded-xl py-3 px-5 focus:ring-1 focus:ring-orange-400 outline-none transition-all text-foreground font-bold text-sm"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">LinkedIn</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-orange-700 ml-1">LinkedIn</label>
                     <input 
                       type="text" 
-                      className="w-full bg-secondary/50 border border-white/10 rounded-xl py-3 px-5 focus:ring-1 focus:ring-primary outline-none transition-all text-white font-bold text-sm"
+                      className="w-full bg-orange-50/30 border border-border rounded-xl py-3 px-5 focus:ring-1 focus:ring-orange-400 outline-none transition-all text-foreground font-bold text-sm"
                       value={formData.linkedin}
                       placeholder="https://..."
                       onChange={(e) => setFormData({...formData, linkedin: e.target.value})}
@@ -339,9 +339,9 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Biometric Brief</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-orange-700 ml-1">Biometric Brief</label>
                   <textarea 
-                    className="w-full bg-secondary/50 border border-white/10 rounded-xl py-3 px-5 focus:ring-1 focus:ring-primary outline-none transition-all min-h-[100px] text-white font-medium text-sm italic"
+                    className="w-full bg-orange-50/30 border border-border rounded-xl py-3 px-5 focus:ring-1 focus:ring-orange-400 outline-none transition-all min-h-[100px] text-foreground font-medium text-sm italic"
                     value={formData.bio}
                     onChange={(e) => setFormData({...formData, bio: e.target.value})}
                   />
@@ -349,19 +349,19 @@ export default function DashboardPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">GitHub Endpoint</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-orange-700 ml-1">GitHub Endpoint</label>
                     <input 
                       type="text" 
-                      className="w-full bg-secondary/50 border border-white/10 rounded-xl py-3 px-5 focus:ring-1 focus:ring-primary outline-none transition-all text-white font-bold text-sm"
+                      className="w-full bg-orange-50/30 border border-border rounded-xl py-3 px-5 focus:ring-1 focus:ring-orange-400 outline-none transition-all text-foreground font-bold text-sm"
                       value={formData.github}
                       onChange={(e) => setFormData({...formData, github: e.target.value})}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Web Address</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-orange-700 ml-1">Web Address</label>
                     <input 
                       type="text" 
-                      className="w-full bg-secondary/50 border border-white/10 rounded-xl py-3 px-5 focus:ring-1 focus:ring-primary outline-none transition-all text-white font-bold text-sm"
+                      className="w-full bg-orange-50/30 border border-border rounded-xl py-3 px-5 focus:ring-1 focus:ring-orange-400 outline-none transition-all text-foreground font-bold text-sm"
                       value={formData.portfolio}
                       onChange={(e) => setFormData({...formData, portfolio: e.target.value})}
                     />
@@ -372,7 +372,7 @@ export default function DashboardPage() {
                     <button 
                     type="submit"
                     disabled={saving}
-                    className="flex-1 bg-primary text-white font-black uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 transition-all text-xs"
+                    className="flex-1 bg-primary text-white font-black uppercase tracking-[0.2em] py-4 rounded-2xl shadow-sm flex items-center justify-center gap-3 active:scale-95 transition-all text-xs border border-primary/20"
                     >
                     {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-4 h-4" />}
                     Confirm Sync
@@ -380,7 +380,7 @@ export default function DashboardPage() {
                     <button 
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="px-8 bg-secondary/50 text-white font-black uppercase tracking-[0.2em] py-4 rounded-2xl active:scale-95 transition-all text-xs border border-white/5"
+                    className="px-8 bg-orange-50 text-orange-900 font-black uppercase tracking-[0.2em] py-4 rounded-2xl active:scale-95 transition-all text-xs border border-orange-200"
                     >
                     Cancel
                     </button>
@@ -392,18 +392,18 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="p-8 rounded-[2.5rem] glass border-white/10 space-y-8 shadow-2xl relative overflow-hidden"
+                className="p-8 rounded-[2.5rem] glass border-border bg-white space-y-8 shadow-sm relative overflow-hidden"
               >
-                <div className="absolute top-0 right-0 p-6 opacity-50">
+                <div className="absolute top-0 right-0 p-6 opacity-30">
                    <div className="flex gap-1.5">
-                      {[1,2,3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-primary/20" />)}
+                      {[1,2,3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-orange-200" />)}
                    </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                     <LayoutDashboard className="w-5 h-5 text-primary" />
-                     <h3 className="text-2xl font-black tracking-tight">Spatial Intelligence</h3>
+                     <LayoutDashboard className="w-5 h-5 text-orange-600" />
+                     <h3 className="text-2xl font-black tracking-tight text-foreground">Spatial Intelligence</h3>
                   </div>
                   <p className="text-xs text-muted-foreground max-w-lg leading-relaxed">
                     Weighted visualization of your credibility vector.
@@ -416,8 +416,8 @@ export default function DashboardPage() {
                   />
                 )}
                 
-                <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-emerald-400/80 font-bold text-[9px] uppercase tracking-[0.2em]">
+                <div className="pt-6 border-t border-border flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-orange-600/60 font-bold text-[9px] uppercase tracking-[0.2em]">
                     <ShieldCheck className="w-4 h-4" />
                     <span>Telemetry Verified</span>
                   </div>
@@ -431,12 +431,14 @@ export default function DashboardPage() {
         </main>
       </div>
 
+
       {/* Footer Meta */}
-      <footer className="pt-8 text-center pb-12 border-t border-white/5 mx-10">
+      <footer className="pt-8 text-center pb-12 border-t border-border mx-10">
         <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.5em]">
           Credovia Protocol • v1.0.4-Stable
         </p>
       </footer>
     </div>
+
   );
 }
