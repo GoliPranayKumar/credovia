@@ -6,6 +6,8 @@ import {
   Crown, Target, CheckCircle, Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
+import confetti from "canvas-confetti";
 
 interface Badge {
   id: string;
@@ -108,6 +110,55 @@ export function AchievementBadges({ score, profile, breakdown }: AchievementBadg
   ];
 
   const earnedCount = badges.filter((b) => b.earned).length;
+
+  // Confetti on badge unlock (detect new badge since last visit)
+  useEffect(() => {
+    const STORAGE_KEY = `credovia-badges-${profile.$id || "user"}`;
+    const prev: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const nowEarned = badges.filter((b) => b.earned).map((b) => b.id);
+    const newlyUnlocked = nowEarned.filter((id) => !prev.includes(id));
+
+    if (newlyUnlocked.length > 0) {
+      // Fire confetti
+      const fire = (opts: confetti.Options) =>
+        confetti({ ...opts, disableForReducedMotion: true });
+
+      const fireConfetti = () => {
+        fire({
+          particleCount: 60,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ["#8b5cf6", "#06b6d4", "#10b981", "#f59e0b"],
+        });
+        fire({
+          particleCount: 60,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ["#8b5cf6", "#06b6d4", "#10b981", "#f59e0b"],
+        });
+      };
+
+      setTimeout(fireConfetti, 600);
+
+      // Push notification for each new badge
+      newlyUnlocked.forEach((id) => {
+        const badge = badges.find((b) => b.id === id);
+        if (badge && (window as any).__addCredoviaNotif) {
+          (window as any).__addCredoviaNotif({
+            type: "badge",
+            title: `Badge Unlocked: ${badge.name}`,
+            message: badge.description,
+          });
+        }
+      });
+    }
+
+    // Always update stored state
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nowEarned));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <section className="p-8 rounded-[2.5rem] glass border-border bg-white shadow-sm space-y-6">

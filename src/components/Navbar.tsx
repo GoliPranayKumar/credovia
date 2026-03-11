@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { User, ShieldCheck, Search, LayoutDashboard, LogOut, Sun, Moon } from "lucide-react";
+import { ShieldCheck, Search, LayoutDashboard, Sun, Moon, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { account } from "@/lib/appwrite";
 import { useTheme } from "@/components/ThemeProvider";
+import { NotificationsPanel } from "@/components/NotificationsPanel";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -21,6 +22,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: "Search", href: "/search", icon: Search },
+    { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, protected: true },
   ];
 
@@ -58,7 +60,7 @@ export default function Navbar() {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="relative w-10 h-10 rounded-xl border border-border/60 bg-secondary/50 hover:bg-secondary flex items-center justify-center transition-all active:scale-90 group overflow-hidden"
+            className="relative w-10 h-10 rounded-xl border border-border/60 bg-secondary/50 hover:bg-secondary flex items-center justify-center transition-all active:scale-90 overflow-hidden"
             aria-label="Toggle theme"
           >
             <Sun className={cn(
@@ -71,24 +73,25 @@ export default function Navbar() {
             )} />
           </button>
 
+          {/* Notifications (only for logged-in users) */}
+          {user && <NotificationsPanel userId={user.$id} />}
+
           {user ? (
-            <Link 
-              href="/dashboard" 
+            <Link
+              href="/dashboard"
               className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white dark:border-gray-800"
             >
               {user.name?.[0] || "U"}
             </Link>
           ) : (
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-sm transition-all active:scale-95"
             >
               Get Started
             </Link>
           )}
         </div>
-
-
       </div>
     </nav>
   );

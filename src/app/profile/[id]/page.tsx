@@ -20,6 +20,7 @@ import { ID, Query } from "appwrite";
 import { motion } from "framer-motion";
 import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
 import { VerificationBadges } from "@/components/VerificationBadges";
+import { ProfileQRCode } from "@/components/ProfileQRCode";
 
 export default function PublicProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -110,8 +111,9 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
             <VerificationBadges profile={profile} />
           </div>
 
-          <div className="pt-4">
+          <div className="pt-4 flex items-center gap-3 flex-wrap">
             <ScoreBadge score={profile.score} size="lg" />
+            <ProfileQRCode profileId={profile.$id} name={profile.name} />
           </div>
         </div>
       </section>

@@ -32,6 +32,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CertificateTemplate } from "@/components/CertificateTemplate";
 import { ShareScoreCard } from "@/components/ShareScoreCard";
 import { AchievementBadges } from "@/components/AchievementBadges";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { ProfileQRCode } from "@/components/ProfileQRCode";
+import { ProfileCustomizer, getAccentGradient } from "@/components/ProfileCustomizer";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { getScoreLabel } from "@/lib/score";
@@ -43,6 +46,7 @@ export default function DashboardPage() {
   const [formData, setFormData] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
+  const [savingAccent, setSavingAccent] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -139,8 +143,27 @@ export default function DashboardPage() {
     }
   };
 
+  const saveAccentColor = async (accent: string) => {
+    setSavingAccent(true);
+    try {
+      await databases.updateDocument(
+        DATABASE_ID,
+        USERS_COLLECTION_ID,
+        profile.$id,
+        { accentColor: accent }
+      );
+      await refresh();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingAccent(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 text-foreground">
+      {/* Onboarding Wizard — shows once for new users */}
+      <OnboardingWizard />
       {/* Hidden Certificate */}
       <div className="fixed overflow-hidden h-0 w-0 pointer-events-none opacity-0">
         <CertificateTemplate 
@@ -237,6 +260,13 @@ export default function DashboardPage() {
             
             <div className="relative">
               <ScoreGauge score={profile.score} />
+              {/* Accent-coloured user avatar behind gauge */}
+              <div
+                className="w-12 h-12 rounded-2xl absolute -top-3 -right-3 flex items-center justify-center text-lg font-black text-white shadow-lg border-2 border-white dark:border-gray-800"
+                style={{ background: getAccentGradient(profile.accentColor) }}
+              >
+                {profile.name?.[0] || "U"}
+              </div>
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white border border-border px-3 py-1 rounded-full shadow-lg flex items-center gap-2">
                  <Fingerprint className="w-2.5 h-2.5 text-primary" />
                  <span className="text-[9px] font-black uppercase tracking-widest text-foreground">Identity PK</span>
@@ -298,6 +328,10 @@ export default function DashboardPage() {
               <p className="text-[8px] text-muted-foreground mt-3 font-bold uppercase tracking-widest opacity-40">
                 Verifiable Protocol Artifact
               </p>
+              {/* QR Code */}
+              <div className="pt-1 flex justify-center">
+                <ProfileQRCode profileId={profile.$id} name={profile.name} />
+              </div>
             </div>
 
             {/* Space Filler: Protocol Rank & Health */}
@@ -406,6 +440,13 @@ export default function DashboardPage() {
                     />
                   </div>
                 </div>
+
+                {/* Profile Color */}
+                <ProfileCustomizer
+                  currentAccent={profile.accentColor || "violet"}
+                  onSave={saveAccentColor}
+                  saving={savingAccent}
+                />
 
                 <div className="flex gap-3 pt-2">
                     <button 
