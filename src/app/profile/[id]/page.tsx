@@ -22,6 +22,8 @@ import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
 import { VerificationBadges } from "@/components/VerificationBadges";
 import { ProfileQRCode } from "@/components/ProfileQRCode";
 
+import { withRetry, getCachedData, setCachedData } from "@/lib/app-utils";
+
 export default function PublicProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { user, profile: currentUserProfile } = useAuth();
@@ -37,16 +39,29 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
   }, [id]);
 
   const fetchData = async () => {
-    try {
-      const p = await databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, id);
-      setProfile(p);
+    // Try cache first
+    const cacheKey = `profile-${id}`;
+    const cached = getCachedData<any>(cacheKey);
+    if (cached) {
+      setProfile(cached.profile);
+      setReviews(cached.reviews);
+      setLoading(false);
+      // Still fetch in background to keep data fresh, but without blocking UI
+    }
 
-      const r = await databases.listDocuments(
-        DATABASE_ID,
-        REVIEWS_COLLECTION_ID,
-        [Query.equal("targetUserId", id), Query.orderDesc("$createdAt")]
-      );
+    try {
+      const [p, r] = await Promise.all([
+        withRetry(() => databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, id)),
+        withRetry(() => databases.listDocuments(
+          DATABASE_ID,
+          REVIEWS_COLLECTION_ID,
+          [Query.equal("targetUserId", id), Query.orderDesc("$createdAt")]
+        ))
+      ]);
+      
+      setProfile(p);
       setReviews(r.documents);
+      setCachedData(cacheKey, { profile: p, reviews: r.documents });
     } catch (err) {
       console.error(err);
     } finally {

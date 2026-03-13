@@ -10,19 +10,31 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+import { withRetry, getCachedData, setCachedData } from "@/lib/app-utils";
+
 export default function LeaderboardPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
+      const cacheKey = "leaderboard-top-20";
+      const cached = getCachedData<any[]>(cacheKey);
+      if (cached) {
+        setUsers(cached);
+        setLoading(false);
+      }
+
       try {
-        const res = await databases.listDocuments(
-          DATABASE_ID,
-          USERS_COLLECTION_ID,
-          [Query.orderDesc("score"), Query.limit(20)]
+        const res = await withRetry(() => 
+          databases.listDocuments(
+            DATABASE_ID,
+            USERS_COLLECTION_ID,
+            [Query.orderDesc("score"), Query.limit(20)]
+          )
         );
         setUsers(res.documents);
+        setCachedData(cacheKey, res.documents);
       } catch (err) {
         console.error(err);
       } finally {

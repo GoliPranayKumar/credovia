@@ -9,29 +9,57 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { VerificationBadges } from "@/components/VerificationBadges";
 
+import { withRetry, getCachedData, setCachedData } from "@/lib/app-utils";
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Initial fetch Top Users
   useEffect(() => {
-    // Initial fetch of top users
-    fetchUsers();
+    fetchUsers("");
   }, []);
 
-  const fetchUsers = async (searchQuery?: string) => {
+  // Debounced search effect
+  useEffect(() => {
+    if (query.length === 0) {
+      fetchUsers("");
+      return;
+    }
+    
+    const handler = setTimeout(() => {
+      fetchUsers(query);
+    }, 400); // 400ms debounce
+
+    return () => clearTimeout(handler);
+  }, [query]);
+
+  const fetchUsers = async (searchQuery: string) => {
+    // Check cache first
+    const cacheKey = `search-${searchQuery || "top"}`;
+    const cached = getCachedData<any[]>(cacheKey);
+    if (cached) {
+      setUsers(cached);
+      return;
+    }
+
     setLoading(true);
     try {
       const queries = searchQuery 
         ? [Query.contains("name", searchQuery)]
         : [Query.orderDesc("score"), Query.limit(10)];
         
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        USERS_COLLECTION_ID,
-        queries
+      const response = await withRetry(() => 
+        databases.listDocuments(
+          DATABASE_ID,
+          USERS_COLLECTION_ID,
+          queries
+        )
       );
+      
       setUsers(response.documents);
+      setCachedData(cacheKey, response.documents);
     } catch (err) {
       console.error(err);
     } finally {
@@ -39,7 +67,7 @@ export default function SearchPage() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchUsers(query);
   };
@@ -51,7 +79,7 @@ export default function SearchPage() {
         <p className="text-lg md:text-xl text-muted-foreground px-4">Search the directory by name to view credibility scores.</p>
       </div>
 
-      <form onSubmit={handleSearch} className="relative group px-4 md:px-0">
+      <form onSubmit={handleSearchSubmit} className="relative group px-4 md:px-0">
         <div className="absolute inset-x-0 -bottom-2 h-4 bg-blue-400/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
         <div className="relative flex flex-col sm:flex-row gap-3 md:gap-4">
           <div className="relative flex-1">

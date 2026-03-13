@@ -53,7 +53,11 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { getScoreLabel } from "@/lib/score";
 
-export default function DashboardPage() {
+import { withRetry } from "@/lib/app-utils";
+
+import { Suspense } from "react";
+
+function DashboardContent() {
   const { user, profile, loading, logout, refresh, loginWithGithub, loginWithLinkedin, sendVerificationEmail } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -115,20 +119,19 @@ export default function DashboardPage() {
         updateData.portfolio = syncInputValue.startsWith("http") ? syncInputValue : `https://${syncInputValue}`;
       }
 
-      // Automatically recalculate their new Credibility score after syncing!
       const { total: newScore } = calculateCredibilityScore({...profile, ...updateData});
       updateData.score = newScore;
 
-      // Update their Database Profile
-      await databases.updateDocument(
-        DATABASE_ID,
-        USERS_COLLECTION_ID,
-        profile.$id,
-        updateData
+      await withRetry(() => 
+        databases.updateDocument(
+          DATABASE_ID,
+          USERS_COLLECTION_ID,
+          profile.$id,
+          updateData
+        )
       );
       
       setShowSyncModal(false);
-      // Refresh the page data
       await refresh();
       
       if ((window as any).__addCredoviaNotif) {
@@ -151,7 +154,7 @@ export default function DashboardPage() {
     if (!alchemyData && profile.walletAddress) {
       setLoadingAlchemy(true);
       try {
-        const data = await analyzeWallet(profile.walletAddress);
+        const data = await withRetry(() => analyzeWallet(profile.walletAddress));
         if (data) setAlchemyData(data);
       } catch (err) {
         console.error(err);
@@ -166,11 +169,11 @@ export default function DashboardPage() {
     if (!linkedinData && profile.linkedin) {
       setLoadingLinkedin(true);
       try {
-        const response = await fetch("/api/linkedin", {
+        const response = await withRetry(() => fetch("/api/linkedin", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ linkedinUrl: profile.linkedin })
-        });
+        }));
         const data = await response.json();
         if (response.ok) {
           // If the profile is verified via SSO, we prioritize that data
@@ -231,11 +234,13 @@ export default function DashboardPage() {
     setSaving(true);
     try {
       const { total: newScore } = calculateCredibilityScore(formData);
-      await databases.updateDocument(
-        DATABASE_ID,
-        USERS_COLLECTION_ID,
-        profile.$id,
-        { ...formData, score: newScore }
+      await withRetry(() => 
+        databases.updateDocument(
+          DATABASE_ID,
+          USERS_COLLECTION_ID,
+          profile.$id,
+          { ...formData, score: newScore }
+        )
       );
       await refresh();
       setIsEditing(false);
@@ -1272,5 +1277,17 @@ export default function DashboardPage() {
       </AnimatePresence>
     </div>
 
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

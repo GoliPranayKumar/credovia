@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider } from "@/context/AuthContext";
 
 declare global {
   interface Window {
@@ -25,14 +26,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} gradient-bg min-h-screen antialiased`}>
-        <ThemeProvider>
-          <Navbar />
-          <main className="pt-24 pb-12 px-6">
-            <div className="max-w-7xl mx-auto">
-              {children}
-            </div>
-          </main>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <Navbar />
+            <main className="pt-24 pb-12 px-6">
+              <div className="max-w-7xl mx-auto">
+                {children}
+              </div>
+            </main>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
