@@ -7,6 +7,8 @@ import { ShieldCheck, Loader2, CheckCircle2, XCircle, ArrowRight } from "lucide-
 import { motion } from "framer-motion";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
