@@ -64,21 +64,21 @@ export function ScoreProgress({ score }: { score: number }) {
 
 export function ScoreRadarChart({ breakdown }: { breakdown: any }) {
   const data = [
-    { subject: 'Crypto', A: breakdown.crypto, fullMark: 40 },
-    { subject: 'GitHub', A: breakdown.github, fullMark: 25 },
-    { subject: 'Identity', A: breakdown.identity, fullMark: 10 },
+    { subject: 'On-Chain', A: breakdown.crypto, fullMark: 35 },
+    { subject: 'Dev Activity', A: breakdown.github, fullMark: 25 },
+    { subject: 'Identity', A: breakdown.identity, fullMark: 15 },
     { subject: 'Domain', A: breakdown.domain, fullMark: 10 },
     { subject: 'Behavior', A: breakdown.behavior, fullMark: 10 },
-    { subject: 'Peer', A: breakdown.peer, fullMark: 5 },
+    { subject: 'Endorsements', A: breakdown.peer, fullMark: 5 },
   ];
 
   return (
     <div className="h-[280px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border relative overflow-hidden group">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
           <PolarGrid stroke="rgba(37,99,235,0.05)" />
-          <PolarAngleAxis dataKey="subject" tick={{ fill: '#2563eb', fontSize: 10, fontWeight: 700 }} />
+          <PolarAngleAxis dataKey="subject" tick={{ fill: '#2563eb', fontSize: 9, fontWeight: 700 }} />
           <Radar
             name="Credibility"
             dataKey="A"
@@ -94,21 +94,28 @@ export function ScoreRadarChart({ breakdown }: { breakdown: any }) {
 
 export function ScoreBarComparison({ breakdown }: { breakdown: any }) {
   const data = [
-    { name: 'Crypto', current: breakdown.crypto, max: 40 },
-    { name: 'GitHub', current: breakdown.github, max: 25 },
-    { name: 'Identity', current: breakdown.identity, max: 10 },
+    { name: 'On-Chain', current: breakdown.crypto, max: 35 },
+    { name: 'Dev Activity', current: breakdown.github, max: 25 },
+    { name: 'Identity', current: breakdown.identity, max: 15 },
     { name: 'Domain', current: breakdown.domain, max: 10 },
-    { name: 'Social', current: breakdown.behavior, max: 10 },
-    { name: 'Peer', current: breakdown.peer, max: 5 },
-  ].sort((a, b) => b.current - a.current);
+    { name: 'Behavior', current: breakdown.behavior, max: 10 },
+    { name: 'Endorsements', current: breakdown.peer, max: 5 },
+  ].sort((a, b) => (a.current / a.max) - (b.current / b.max)); // Sort by efficiency percentage
 
   return (
     <div className="h-[250px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border">
       <h5 className="text-[10px] font-black uppercase text-blue-900/60 mb-4 tracking-widest">Efficiency Ranking</h5>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart layout="vertical" data={data} margin={{ left: -20 }}>
-          <XAxis type="number" hide domain={[0, 40]} />
-          <YAxis dataKey="name" type="category" tick={{ fill: '#2563eb', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
+        <BarChart layout="vertical" data={data} margin={{ left: 15, right: 30 }}>
+          <XAxis type="number" hide domain={[0, 'dataMax']} />
+          <YAxis 
+            dataKey="name" 
+            type="category" 
+            tick={{ fill: '#2563eb', fontSize: 9, fontWeight: 700 }} 
+            axisLine={false} 
+            tickLine={false}
+            width={70}
+          />
           <Tooltip 
             cursor={{ fill: 'rgba(37,99,235,0.02)' }}
             contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(37,99,235,0.1)', borderRadius: '12px', fontSize: '10px' }}
@@ -229,9 +236,9 @@ export function ScoreGauge({ score }: { score: number }) {
 
 export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
   const items = [
-    { label: "On-Chain", value: breakdown.crypto, max: 40, color: "#2563eb" },
+    { label: "On-Chain", value: breakdown.crypto, max: 35, color: "#2563eb" },
     { label: "Dev Activity", value: breakdown.github, max: 25, color: "#3b82f6" },
-    { label: "Identity", value: breakdown.identity, max: 10, color: "#93c5fd" },
+    { label: "Identity", value: breakdown.identity, max: 15, color: "#93c5fd" },
     { label: "Domain", value: breakdown.domain, max: 10, color: "#2563eb" },
     { label: "Behavior", value: breakdown.behavior, max: 10, color: "#3b82f6" },
     { label: "Endorsements", value: breakdown.peer, max: 5, color: "#93c5fd" },

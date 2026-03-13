@@ -10,7 +10,7 @@
   --color-popover: hsl(0 0% 100%);
   --color-popover-foreground: hsl(222 47% 11%);
   
-  --color-primary: hsl(217 91% 60%);
+  --color-primary: hsl(262 83% 65%);
   --color-primary-foreground: hsl(0 0% 100%);
   
   --color-secondary: hsl(210 40% 96%);
@@ -19,15 +19,15 @@
   --color-muted: hsl(210 40% 96%);
   --color-muted-foreground: hsl(215 16% 47%);
   
-  --color-accent: hsl(217 91% 95%);
-  --color-accent-foreground: hsl(217 91% 60%);
+  --color-accent: hsl(262 83% 95%);
+  --color-accent-foreground: hsl(262 83% 65%);
   
   --color-destructive: hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(0 0% 98%);
   
   --color-border: hsl(214 32% 91%);
   --color-input: hsl(214 32% 91%);
-  --color-ring: hsl(217 91% 60%);
+  --color-ring: hsl(262 83% 65%);
   
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
@@ -89,14 +89,14 @@
 
 /* ===== GRADIENT UTILITIES ===== */
 .gradient-text {
-  @apply bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-violet-600 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent;
 }
 
 .gradient-bg {
-  @apply bg-gradient-to-br from-blue-50/50 via-background to-blue-100/30;
+  @apply bg-gradient-to-br from-violet-50/50 dark:from-violet-900/10 via-background to-fuchsia-100/30 dark:to-fuchsia-900/10;
 }
 .dark .gradient-bg {
-  background: linear-gradient(to bottom right, rgba(139,92,246,0.06), var(--color-background), rgba(6,182,212,0.04));
+  background: linear-gradient(to bottom right, rgba(139,92,246,0.06), var(--color-background), rgba(217,70,239,0.04));
 }
 
 /* ===== DARK MODE OVERRIDES FOR HARDCODED WHITE BGs ===== */

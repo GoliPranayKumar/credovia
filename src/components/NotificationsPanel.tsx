@@ -53,18 +53,41 @@ export function NotificationsPanel({ userId }: { userId?: string }) {
   const [open, setOpen] = useState(false);
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const panelRef = useRef<HTMLDivElement>(null);
+  const isFirstMount = useRef(true);
 
+  // Load from storage
   useEffect(() => {
     const key = `credovia-notifs-${userId || "guest"}`;
     const stored = localStorage.getItem(key);
+    let initialNotifs: Notification[] = [];
+    
     if (stored) {
-      setNotifs(JSON.parse(stored));
+      try {
+        initialNotifs = JSON.parse(stored);
+      } catch (e) {
+        initialNotifs = getDefaultNotifs();
+      }
     } else {
-      const defaults = getDefaultNotifs();
-      setNotifs(defaults);
-      localStorage.setItem(key, JSON.stringify(defaults));
+      initialNotifs = getDefaultNotifs();
     }
+
+    // De-duplicate on load (in case previous errors left trash in storage)
+    const uniqueMap = new Map();
+    initialNotifs.forEach(n => {
+      if (!uniqueMap.has(n.id)) uniqueMap.set(n.id, n);
+    });
+    setNotifs(Array.from(uniqueMap.values()));
   }, [userId]);
+
+  // Save to storage
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    const key = `credovia-notifs-${userId || "guest"}`;
+    localStorage.setItem(key, JSON.stringify(notifs));
+  }, [notifs, userId]);
 
   // Close on outside click
   useEffect(() => {
@@ -80,33 +103,27 @@ export function NotificationsPanel({ userId }: { userId?: string }) {
   const unread = notifs.filter((n) => !n.read).length;
 
   const markAllRead = () => {
-    const updated = notifs.map((n) => ({ ...n, read: true }));
-    setNotifs(updated);
-    const key = `credovia-notifs-${userId || "guest"}`;
-    localStorage.setItem(key, JSON.stringify(updated));
+    setNotifs(prev => prev.map((n) => ({ ...n, read: true })));
   };
 
   const dismissNotif = (id: string) => {
-    const updated = notifs.filter((n) => n.id !== id);
-    setNotifs(updated);
-    const key = `credovia-notifs-${userId || "guest"}`;
-    localStorage.setItem(key, JSON.stringify(updated));
+    setNotifs(prev => prev.filter((n) => n.id !== id));
   };
 
-  // Expose addNotification globally for other components
+  // Expose helper globally
   useEffect(() => {
     (window as any).__addCredoviaNotif = (notif: Omit<Notification, "id" | "read" | "time">) => {
       const newNotif: Notification = {
         ...notif,
-        id: Date.now().toString(),
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
         read: false,
         time: "Just now",
       };
+      
       setNotifs((prev) => {
-        const updated = [newNotif, ...prev];
-        const key = `credovia-notifs-${userId || "guest"}`;
-        localStorage.setItem(key, JSON.stringify(updated));
-        return updated;
+        // Double check for duplicates before adding
+        if (prev.some(p => p.id === newNotif.id)) return prev;
+        return [newNotif, ...prev];
       });
     };
   }, [userId]);

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { ShieldCheck, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, Github } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { login } = useAuth();
+  const { login, loginWithGithub } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +31,10 @@ export default function LoginPage() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-3xl bg-white border border-border/60 shadow-xl shadow-blue-100/20 space-y-8"
+        className="w-full max-w-md p-8 rounded-3xl bg-white border border-border/60 shadow-xl shadow-violet-100/20 space-y-8"
       >
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-blue-500/15 mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-violet-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-violet-500/15 mb-4">
             <ShieldCheck className="text-white w-10 h-10" />
           </div>
           <h1 className="text-3xl font-black">Welcome Back</h1>
@@ -55,7 +55,7 @@ export default function LoginPage() {
               <input 
                 type="email" 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-violet-400 focus:border-transparent outline-none transition-all"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -70,7 +70,7 @@ export default function LoginPage() {
               <input 
                 type="password" 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-violet-400 focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -82,7 +82,7 @@ export default function LoginPage() {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/15 transition-all active:scale-95 flex items-center justify-center gap-2 border border-primary/20"
+              className="w-full bg-primary hover:bg-violet-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-violet-500/15 transition-all active:scale-95 flex items-center justify-center gap-2 border border-primary/20"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Sign In <ArrowRight className="w-5 h-5" /></>}
             </button>
@@ -92,14 +92,31 @@ export default function LoginPage() {
                 setEmail("demo@credovia.com");
                 setPassword("password");
               }}
-              className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 font-medium py-3 rounded-2xl border border-blue-200 transition-all text-sm"
+              className="w-full bg-violet-50 hover:bg-violet-100 text-violet-900 font-medium py-3 rounded-2xl border border-violet-200 transition-all text-sm"
             >
               Autofill Demo Account
             </button>
           </div>
         </form>
 
-        <p className="text-center text-muted-foreground">
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border"></span>
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={loginWithGithub}
+          className="w-full bg-[#24292e] hover:bg-[#2f363d] text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-3"
+        >
+          <Github className="w-6 h-6" /> GitHub
+        </button>
+
+        <p className="text-center text-muted-foreground mt-8">
           Don't have an account? <Link href="/signup" className="text-primary font-bold hover:underline">Sign up</Link>
         </p>
       </motion.div>

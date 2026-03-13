@@ -22,10 +22,26 @@ import {
   Fingerprint,
   TrendingUp,
   Users,
-  Share2
+  Share2,
+  Mail,
+  CheckCircle2,
+  Star,
+  GitBranch,
+  Calendar,
+  Zap,
+  Users2,
+  FileText,
+  UserPlus,
+  Activity,
+  X,
+  ArrowRight,
+  Rocket,
+  Search,
+  Layers
 } from "lucide-react";
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite";
 import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
+import { analyzeWallet } from "@/lib/alchemy";
 import { motion, AnimatePresence } from "framer-motion";
 import { CertificateTemplate } from "@/components/CertificateTemplate";
 import { ShareScoreCard } from "@/components/ShareScoreCard";
@@ -38,15 +54,145 @@ import jsPDF from "jspdf";
 import { getScoreLabel } from "@/lib/score";
 
 export default function DashboardPage() {
-  const { user, profile, loading, logout, refresh } = useAuth();
+  const { user, profile, loading, logout, refresh, loginWithGithub, loginWithLinkedin, sendVerificationEmail } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [savingAccent, setSavingAccent] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [showGithubInsights, setShowGithubInsights] = useState(false);
+  const [showAlchemyInsights, setShowAlchemyInsights] = useState(false);
+  const [alchemyData, setAlchemyData] = useState<any>(null);
+  const [loadingAlchemy, setLoadingAlchemy] = useState(false);
+  const [showLinkedinInsights, setShowLinkedinInsights] = useState(false);
+  const [linkedinData, setLinkedinData] = useState<any>(null);
+  const [loadingLinkedin, setLoadingLinkedin] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [syncPlatform, setSyncPlatform] = useState<string | null>(null);
+  const [syncInputValue, setSyncInputValue] = useState("");
+  const [isSubmittingSync, setIsSubmittingSync] = useState(false);
+
+  const handleSync = (platform: string) => {
+    if (platform === "GitHub SSO") {
+       loginWithGithub();
+       return;
+    }
+    if (platform === "LinkedIn") {
+       loginWithLinkedin();
+       return;
+    }
+    
+    // For others, show our custom in-app modal instead of browser prompt
+    setSyncPlatform(platform);
+    setSyncInputValue("");
+    setShowSyncModal(true);
+  };
+
+  const submitSync = async () => {
+    if (!syncPlatform || !syncInputValue) return;
+    setIsSubmittingSync(true);
+    
+    try {
+      let updateData: any = {};
+      
+      if (syncPlatform === "Alchemy / Web3") {
+        if (!syncInputValue.startsWith("0x")) {
+          alert("Verification Failed: Invalid wallet address format.");
+          setIsSubmittingSync(false);
+          return;
+        }
+        updateData.walletAddress = syncInputValue;
+      } else if (syncPlatform === "Official Domain") {
+        if (!syncInputValue.includes(".")) {
+          alert("Verification Failed: Invalid domain format.");
+          setIsSubmittingSync(false);
+          return;
+        }
+        updateData.portfolio = syncInputValue.startsWith("http") ? syncInputValue : `https://${syncInputValue}`;
+      }
+
+      // Automatically recalculate their new Credibility score after syncing!
+      const { total: newScore } = calculateCredibilityScore({...profile, ...updateData});
+      updateData.score = newScore;
+
+      // Update their Database Profile
+      await databases.updateDocument(
+        DATABASE_ID,
+        USERS_COLLECTION_ID,
+        profile.$id,
+        updateData
+      );
+      
+      setShowSyncModal(false);
+      // Refresh the page data
+      await refresh();
+      
+      if ((window as any).__addCredoviaNotif) {
+        (window as any).__addCredoviaNotif({
+          type: "score",
+          title: "Profile Synced",
+          message: `Successfully linked ${syncPlatform} to your protocol identity.`
+        });
+      }
+    } catch (err) {
+      console.error("Sync Failed:", err);
+    } finally {
+      setIsSubmittingSync(false);
+    }
+  };
+
+
+  const handleOpenAlchemyInsights = async () => {
+    setShowAlchemyInsights(true);
+    if (!alchemyData && profile.walletAddress) {
+      setLoadingAlchemy(true);
+      try {
+        const data = await analyzeWallet(profile.walletAddress);
+        if (data) setAlchemyData(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingAlchemy(false);
+      }
+    }
+  };
+
+  const handleOpenLinkedinInsights = async () => {
+    setShowLinkedinInsights(true);
+    if (!linkedinData && profile.linkedin) {
+      setLoadingLinkedin(true);
+      try {
+        const response = await fetch("/api/linkedin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ linkedinUrl: profile.linkedin })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          // If the profile is verified via SSO, we prioritize that data
+          if (profile.linkedin.includes('verified')) {
+             data.isVerified = true;
+             data.name = profile.name;
+          }
+          setLinkedinData(data);
+        } else {
+          setLinkedinData({ error: data.error || "Failed to fetch LinkedIn insights" });
+        }
+      } catch (err) {
+        setLinkedinData({ error: "Network error fetching LinkedIn Data" });
+      } finally {
+        setLoadingLinkedin(false);
+      }
+    }
+  };
 
   useEffect(() => {
+    if (user) {
+      console.log("DEBUG: Current User:", user);
+    }
     if (!loading && !user) {
       router.push("/login");
     }
@@ -94,12 +240,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSync = async (platform: string) => {
-    setSyncing(platform);
-    await new Promise(r => setTimeout(r, 1500));
-    setSyncing(null);
-    await refresh();
-  };
 
   const downloadCertificate = async () => {
     const element = document.getElementById("credovia-certificate");
@@ -141,6 +281,22 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSendVerification = async () => {
+    console.log("DEBUG: handleSendVerification clicked");
+    setSendingVerification(true);
+    try {
+      console.log("DEBUG: Calling sendVerificationEmail from hook...");
+      await sendVerificationEmail();
+      console.log("DEBUG: sendVerificationEmail call finished successfully");
+      setVerificationSent(true);
+    } catch (err: any) {
+      console.error("DEBUG: handleSendVerification caught error:", err);
+      alert(`Failed to send verification email: ${err.message || "Unknown error"}`);
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
   const saveAccentColor = async (accent: string) => {
     setSavingAccent(true);
     try {
@@ -158,8 +314,44 @@ export default function DashboardPage() {
     }
   };
 
+  const githubStats = profile && profile.github ? [
+    { label: "Repos", value: profile.githubRepoCount || 0, icon: GitBranch, pts: 5 },
+    { label: "Stars", value: profile.githubStarCount || 0, icon: Star, pts: 5 },
+    { label: "Commits", value: profile.githubContributionCount || 0, icon: Activity, pts: 3 },
+    { label: "Followers", value: profile.githubFollowerCount || 0, icon: Users2, pts: 2 },
+    { label: "Gists", value: profile.githubGistCount || 0, icon: FileText, pts: 0 },
+    { label: "Following", value: profile.githubFollowingCount || 0, icon: UserPlus, pts: 0 },
+    { label: "Age", value: profile.githubCreatedAt ? `${Math.floor((new Date().getTime() - new Date(profile.githubCreatedAt).getTime()) / (1000 * 60 * 60 * 24 * 365.25))}y` : 0, icon: Calendar, pts: 5 }
+  ] : [];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 text-foreground">
+      {/* Email Verification Banner */}
+      {user && !user.emailVerification && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-100 rounded-xl text-amber-700">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-black text-amber-900 leading-none">Email Verification Required</h4>
+              <p className="text-xs text-amber-700/80 font-medium italic">Please verify your email address to secure your account and access full features.</p>
+            </div>
+          </div>
+          <button
+            onClick={handleSendVerification}
+            disabled={sendingVerification || verificationSent}
+            className="w-full md:w-auto px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-sm shadow-amber-600/10"
+          >
+            {sendingVerification ? <Loader2 className="w-3 h-3 animate-spin" /> : verificationSent ? <CheckCircle2 className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
+            {verificationSent ? "Email Sent!" : "Verify Email Now"}
+          </button>
+        </motion.div>
+      )}
       {/* Onboarding Wizard — shows once for new users */}
       <OnboardingWizard />
       {/* Hidden Certificate */}
@@ -211,38 +403,91 @@ export default function DashboardPage() {
                   <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                </button>
            </div>
-        </div>
+        </div>         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+            {[
+              { 
+                name: "Alchemy / Web3", 
+                desc: "35% Weightage", 
+                icon: LinkIcon, 
+                color: "text-blue-700", 
+                val: profile.walletAddress,
+                isClickable: true
+              },
+              { 
+                name: "GitHub SSO", 
+                desc: "25% Weightage", 
+                icon: Github, 
+                color: "text-blue-800", 
+                val: profile.github,
+                isClickable: true
+              },
+              { 
+                name: "LinkedIn", 
+                desc: "15% Weightage", 
+                icon: Linkedin, 
+                color: "text-blue-700", 
+                val: profile.linkedin,
+                isClickable: true
+              },
+              { 
+                name: "Official Domain", 
+                desc: "10% Weightage", 
+                icon: Globe, 
+                color: "text-blue-700", 
+                val: profile.portfolio 
+              }
+            ].map((platform, i) => (
+               <div 
+                key={i} 
+                onClick={() => {
+                  if (!platform.isClickable || !platform.val) return;
+                  if (platform.name === "GitHub SSO") setShowGithubInsights(true);
+                  if (platform.name === "Alchemy / Web3") handleOpenAlchemyInsights();
+                  if (platform.name === "LinkedIn") handleOpenLinkedinInsights();
+                }}
+                className={`p-5 rounded-[2rem] bg-white border border-border space-y-4 hover:bg-blue-50 transition-all group shadow-sm flex flex-col justify-between ${platform.isClickable && platform.val ? "md:scale-105 border-primary/30 ring-4 ring-primary/5 z-20 cursor-pointer" : ""}`}
+               >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                       <div className={`p-3 rounded-2xl bg-blue-50 ${platform.color} border border-blue-100 shadow-inner`}>
+                          <platform.icon className="w-5 h-5" />
+                       </div>
+                       <div className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${platform.val ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-blue-100 border-blue-200 text-blue-700"} uppercase`}>
+                          {platform.val ? "Verified" : "Pending"}
+                       </div>
+                    </div>
+                    
+                    <div className="space-y-0.5">
+                       <h3 className="text-sm font-black text-foreground">{platform.name}</h3>
+                       <p className="text-[10px] text-muted-foreground opacity-70 italic">{platform.desc}</p>
+                    </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-           {[
-             { name: "Alchemy / Web3", desc: "Digital Assets", icon: LinkIcon, color: "text-blue-700", val: profile.walletAddress },
-             { name: "GitHub SSO", desc: "Dev Activity", icon: Github, color: "text-blue-800", val: profile.github },
-             { name: "Official Domain", desc: "DNS & Web", icon: Globe, color: "text-blue-700", val: profile.portfolio }
-           ].map((platform, i) => (
-              <div key={i} className="p-5 rounded-[2rem] bg-white border border-border space-y-4 hover:bg-blue-50 transition-all group shadow-sm">
-                 <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-2xl bg-blue-50 ${platform.color} border border-blue-100 shadow-inner`}>
-                       <platform.icon className="w-5 h-5" />
-                    </div>
-                    <div className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${platform.val ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-blue-100 border-blue-200 text-blue-700"} uppercase`}>
-                       {platform.val ? "Verified" : "Pending"}
-                    </div>
-                 </div>
-                 <div className="space-y-0.5">
-                    <h3 className="text-sm font-black text-foreground">{platform.name}</h3>
-                    <p className="text-[10px] text-muted-foreground opacity-70 italic">{platform.desc}</p>
-                 </div>
-                 <button 
-                  onClick={() => handleSync(platform.name)}
-                  disabled={syncing === platform.name}
-                  className="w-full py-2.5 bg-blue-50/50 hover:bg-blue-100 border border-blue-100 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all text-blue-800"
-                 >
-                    {syncing === platform.name ? <RefreshCw className="w-3 h-3 animate-spin text-blue-600" /> : <RefreshCw className="w-3 h-3" />}
-                    Authorize & Sync
-                 </button>
-              </div>
-           ))}
-        </div>
+                    {platform.isClickable && platform.val && (
+                      <div className="p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-center justify-between group/btn">
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-3 h-3 text-primary" />
+                          <span className="text-[8px] font-black uppercase text-primary tracking-widest">View Insights</span>
+                        </div>
+                        <ArrowRight className="w-3 h-3 text-primary group-hover/btn:translate-x-1 transition-transform" />
+                      </div>
+                    )}
+                  </div>
+
+                  <button 
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     handleSync(platform.name);
+                   }}
+                   disabled={syncing === platform.name}
+                   className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${platform.val ? "bg-white border-border text-foreground hover:bg-slate-50" : "bg-blue-50/50 hover:bg-blue-100 border-blue-100 text-blue-800"}`}
+                  >
+                     {syncing === platform.name ? <RefreshCw className="w-3 h-3 animate-spin text-blue-600" /> : <RefreshCw className="w-3 h-3" />}
+                     {platform.val ? "Re-Sync Data" : "Authorize & Sync"}
+                  </button>
+               </div>
+            ))}
+         </div>
+
       </section>
 
       {/* Grid Layout: Main Dashboard Content */}
@@ -523,6 +768,513 @@ export default function DashboardPage() {
           Credovia Protocol • v1.0.4-Stable
         </p>
       </footer>
+
+      {/* GitHub Detailed Insights Modal */}
+      <AnimatePresence>
+        {showGithubInsights && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowGithubInsights(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
+            >
+              <div className="p-8 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-blue-50 rounded-2xl text-blue-800 border border-blue-100">
+                      <Github className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-black text-foreground leading-tight">GitHub Evaluation</h2>
+                      <p className="text-sm text-muted-foreground font-medium italic">Protocol Depth Analysis</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowGithubInsights(false)}
+                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <X className="w-6 h-6 text-muted-foreground" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {githubStats.map((stat, i) => (
+                    <div key={i} className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-primary/30 transition-all group">
+                      <div className="flex items-center justify-between">
+                        <stat.icon className="w-5 h-5 text-blue-400 group-hover:text-primary transition-colors" />
+                        {stat.pts > 0 && (
+                           <span className="text-[8px] font-black text-primary px-1.5 py-0.5 bg-primary/10 rounded-full">+{stat.pts} MAX</span>
+                        )}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="text-lg font-black text-foreground">{stat.value}</div>
+                        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{stat.label}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-600/60 ml-1">Deep Intelligence Insights</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[
+                      { 
+                        check: (profile.githubStarCount > 50), 
+                        icon: Rocket, 
+                        color: "text-emerald-600", 
+                        bg: "bg-emerald-50",
+                        border: "border-emerald-100",
+                        title: "High Impact Creator", 
+                        desc: "Your code repository stars indicate significant community trust and architectural stability." 
+                      },
+                      { 
+                        check: (profile.githubFollowerCount > 100), 
+                        icon: Users2, 
+                        color: "text-blue-600", 
+                        bg: "bg-blue-50",
+                        border: "border-blue-100",
+                        title: "Ecosystem Influencer", 
+                        desc: "Your follower count puts you in the top tier of social credibility within the developer network." 
+                      },
+                      { 
+                        check: (profile.githubContributionCount > 500), 
+                        icon: Activity, 
+                        color: "text-indigo-600", 
+                        bg: "bg-indigo-50",
+                        border: "border-indigo-100",
+                        title: "Consistency Vector: High", 
+                        desc: "Exceptional code velocity over time. This metric significantly stabilizes your credibility score." 
+                      },
+                      { 
+                        check: (profile.githubGistCount > 5), 
+                        icon: FileText, 
+                        color: "text-amber-600", 
+                        bg: "bg-amber-50",
+                        border: "border-amber-100",
+                        title: "Knowledge Sharer", 
+                        desc: "Frequent Gist activity suggests a high degree of transparency and technical documentation focus." 
+                      }
+                    ].filter(insight => insight.check).map((insight, i) => (
+                      <div key={i} className={`p-4 rounded-[2rem] ${insight.bg} ${insight.border} border space-y-2`}>
+                        <div className="flex items-center gap-2">
+                          <insight.icon className={`w-4 h-4 ${insight.color}`} />
+                          <h4 className={`text-xs font-black ${insight.color} uppercase tracking-tight`}>{insight.title}</h4>
+                        </div>
+                        <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">{insight.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-border flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Total GitHub Weighted Vector</div>
+                    <div className="text-3xl font-black text-foreground">
+                      {calculateCredibilityScore(profile).breakdown.github} <span className="text-sm text-muted-foreground">/ 25 Pts</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowGithubInsights(false)}
+                    className="px-8 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-600 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-primary/20"
+                  >
+                    Close Report
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Alchemy Detailed Insights Modal */}
+      <AnimatePresence>
+        {showAlchemyInsights && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAlchemyInsights(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
+            >
+              <div className="p-8 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-800 border border-indigo-100">
+                      <LinkIcon className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-black text-foreground leading-tight">Web3 Evaluation</h2>
+                      <p className="text-sm text-muted-foreground font-medium italic">On-Chain Asset Analysis</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowAlchemyInsights(false)}
+                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <X className="w-6 h-6 text-muted-foreground" />
+                  </button>
+                </div>
+
+                {loadingAlchemy ? (
+                  <div className="py-20 flex flex-col items-center justify-center gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                    <p className="text-sm font-bold text-muted-foreground tracking-widest uppercase">Querying Blockchain...</p>
+                  </div>
+                ) : alchemyData ? (
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-indigo-400/30 transition-all group">
+                        <div className="flex items-center justify-between">
+                          <Award className="w-5 h-5 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
+                          <span className="text-[8px] font-black text-indigo-600 px-1.5 py-0.5 bg-indigo-600/10 rounded-full">NFTS</span>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-lg font-black text-foreground">{alchemyData.nfts}</div>
+                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Total Assets</div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-amber-400/30 transition-all group">
+                        <div className="flex items-center justify-between">
+                          <Zap className="w-5 h-5 text-amber-400 group-hover:text-amber-500 transition-colors" />
+                          <span className="text-[8px] font-black text-amber-600 px-1.5 py-0.5 bg-amber-600/10 rounded-full">ETH</span>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-lg font-black text-foreground">{alchemyData.balance?.substring(0, 6) || "0.00"}</div>
+                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Balance</div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-blue-400/30 transition-all group">
+                        <div className="flex items-center justify-between">
+                          <Activity className="w-5 h-5 text-blue-400 group-hover:text-blue-500 transition-colors" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-lg font-black text-foreground">{alchemyData.transactionCount || 0}</div>
+                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Recent Txns</div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-pink-400/30 transition-all group">
+                        <div className="flex items-center justify-between">
+                          <Layers className="w-5 h-5 text-pink-400 group-hover:text-pink-500 transition-colors" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-lg font-black text-foreground">{alchemyData.tokenDiversity || 0}</div>
+                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Token Types</div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-emerald-400/30 transition-all group">
+                        <div className="flex items-center justify-between">
+                          <ShieldCheck className="w-5 h-5 text-emerald-400 group-hover:text-emerald-500 transition-colors" />
+                          <span className="text-[8px] font-black text-emerald-600 px-1.5 py-0.5 bg-emerald-600/10 rounded-full">STATUS</span>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-md mt-1 font-black text-foreground">{alchemyData.isVerified ? 'VERIFIED' : 'PENDING'}</div>
+                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">On-Chain</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-600/60 ml-1">Protocol Insights</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {alchemyData.nfts > 0 && (
+                           <div className="p-4 rounded-[2rem] bg-indigo-50 border border-indigo-100 space-y-2">
+                             <div className="flex items-center gap-2">
+                               <Fingerprint className="w-4 h-4 text-indigo-600" />
+                               <h4 className="text-xs font-black text-indigo-600 uppercase tracking-tight">Active Collector</h4>
+                             </div>
+                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Wallet holder has multiple digital assets indicating robust on-chain engagement.</p>
+                           </div>
+                        )}
+                        {parseFloat(alchemyData.balance || "0") > 0.1 && (
+                           <div className="p-4 rounded-[2rem] bg-amber-50 border border-amber-100 space-y-2">
+                             <div className="flex items-center gap-2">
+                               <Zap className="w-4 h-4 text-amber-600" />
+                               <h4 className="text-xs font-black text-amber-600 uppercase tracking-tight">High Liquidity</h4>
+                             </div>
+                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Wallet maintains healthy token balances for transaction gas and DeFi activities.</p>
+                           </div>
+                        )}
+                        {alchemyData.transactionCount > 10 && (
+                           <div className="p-4 rounded-[2rem] bg-blue-50 border border-blue-100 space-y-2">
+                             <div className="flex items-center gap-2">
+                               <Activity className="w-4 h-4 text-blue-600" />
+                               <h4 className="text-xs font-black text-blue-600 uppercase tracking-tight">Ecosystem Participant</h4>
+                             </div>
+                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Heavy transaction history shows active usage of Web3 infrastructure rather than just holding.</p>
+                           </div>
+                        )}
+                        {alchemyData.tokenDiversity > 3 && (
+                           <div className="p-4 rounded-[2rem] bg-pink-50 border border-pink-100 space-y-2">
+                             <div className="flex items-center gap-2">
+                               <Layers className="w-4 h-4 text-pink-600" />
+                               <h4 className="text-xs font-black text-pink-600 uppercase tracking-tight">Diversified Portfolio</h4>
+                             </div>
+                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Holds multiple types of ERC-20 tokens showing advanced navigation of decentralized finance.</p>
+                           </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : alchemyData?.error ? (
+                  <div className="py-10 text-center space-y-2">
+                    <p className="text-sm text-red-500 font-bold bg-red-50 p-4 rounded-xl border border-red-100">{alchemyData.error}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Verify the wallet address starts with 0x and is valid on Ethereum Mainnet.</p>
+                  </div>
+                ) : (
+                  <div className="py-10 text-center">
+                    <p className="text-sm text-red-500 font-bold">Failed to load Web3 Insights.</p>
+                  </div>
+                )}
+
+                <div className="pt-6 border-t border-border flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Total Web3 Weighted Vector</div>
+                    <div className="text-3xl font-black text-foreground">
+                      {calculateCredibilityScore(profile).breakdown.crypto} <span className="text-sm text-muted-foreground">/ 40 Pts</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowAlchemyInsights(false)}
+                    className="px-8 py-3 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20"
+                  >
+                    Close Report
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* LinkedIn Insights Modal */}
+      <AnimatePresence>
+        {showLinkedinInsights && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLinkedinInsights(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
+            >
+              <div className="p-8 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-sky-50 rounded-2xl text-sky-700 border border-sky-100">
+                      <Linkedin className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-black text-foreground leading-tight">Career Intelligence</h2>
+                      <p className="text-sm text-muted-foreground font-medium italic">RapidAPI Intelligence</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowLinkedinInsights(false)}
+                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <X className="w-6 h-6 text-muted-foreground" />
+                  </button>
+                </div>
+
+                {loadingLinkedin ? (
+                  <div className="py-20 flex flex-col items-center justify-center gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+                    <p className="text-sm font-bold text-muted-foreground tracking-widest uppercase">Scraping Professional Vector...</p>
+                  </div>
+                ) : linkedinData?.error ? (
+                  <div className="py-10 text-center space-y-2">
+                    <p className="text-sm text-red-500 font-bold bg-red-50 p-4 rounded-xl border border-red-100">{linkedinData.error}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Verify the LinkedIn URL is formatted correctly (e.g., linkedin.com/in/name).</p>
+                  </div>
+                ) : linkedinData ? (
+                  <>
+                    <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-6 rounded-[2rem] bg-slate-50 border border-slate-100">
+                      {linkedinData.photo ? (
+                        <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shrink-0">
+                          <img src={linkedinData.photo} alt={linkedinData.name} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-24 h-24 rounded-full bg-blue-100 border-4 border-white shadow-lg shrink-0 flex items-center justify-center text-3xl font-black text-blue-600">
+                          {profile.name[0]}
+                        </div>
+                      )}
+                      
+                      <div className="space-y-2 text-center md:text-left flex-1">
+                        <div className="flex items-center gap-3">
+                           <h3 className="text-2xl font-black text-foreground">{linkedinData.name || profile.name}</h3>
+                           {(linkedinData.isVerified || profile.linkedin?.includes('verified')) && (
+                             <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm">
+                               <ShieldCheck className="w-2.5 h-2.5" />
+                               Verified Identity
+                             </div>
+                           )}
+                        </div>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-100/50 text-sky-800 rounded-full text-xs font-black uppercase tracking-widest border border-sky-200">
+                           <Award className="w-3.5 h-3.5" />
+                           {linkedinData.title || "Professional"}
+                        </div>
+                        <p className="text-sm text-muted-foreground font-medium flex items-center justify-center md:justify-start gap-2 pt-1">
+                          <Activity className="w-4 h-4" />
+                          @ {linkedinData.company}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-1">
+                        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Global Geography</div>
+                        <div className="text-sm font-black text-foreground">{linkedinData.location}</div>
+                      </div>
+                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-1">
+                        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Role Seniority</div>
+                        <div className="text-sm font-black text-foreground capitalize">{linkedinData.seniority || "Unknown"}</div>
+                      </div>
+                    </div>
+
+                    {linkedinData.skills && linkedinData.skills.length > 0 && (
+                      <div className="space-y-3">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Verified Skill Vectors</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {linkedinData.skills.map((skill: string, i: number) => (
+                             <span key={i} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200">
+                               {skill}
+                             </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="py-10 text-center">
+                    <p className="text-sm text-red-500 font-bold">Failed to load Professional Insights.</p>
+                  </div>
+                )}
+
+                <div className="pt-6 border-t border-border flex justify-end">
+                  <button 
+                    onClick={() => setShowLinkedinInsights(false)}
+                    className="px-8 py-3 bg-sky-600 text-white font-black rounded-2xl hover:bg-sky-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-sky-600/20"
+                  >
+                    Close Report
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Verification Input Modal */}
+      <AnimatePresence>
+        {showSyncModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isSubmittingSync && setShowSyncModal(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-border"
+            >
+              <div className="p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 border border-blue-100">
+                         {syncPlatform === "Alchemy / Web3" ? <LinkIcon className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-foreground">Verification Protocol</h3>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{syncPlatform}</p>
+                      </div>
+                   </div>
+                   {!isSubmittingSync && (
+                      <button onClick={() => setShowSyncModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors">
+                        <X className="w-5 h-5 text-muted-foreground" />
+                      </button>
+                   )}
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                      {syncPlatform === "Alchemy / Web3" ? "Ethereum Wallet Address" : "Deployment Domain / URL"}
+                    </label>
+                    <input 
+                      type="text"
+                      value={syncInputValue}
+                      onChange={(e) => setSyncInputValue(e.target.value)}
+                      placeholder={syncPlatform === "Alchemy / Web3" ? "0x..." : "example.com"}
+                      disabled={isSubmittingSync}
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300"
+                    />
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex gap-3">
+                     <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0" />
+                     <p className="text-[10px] text-amber-800 leading-relaxed font-bold italic">
+                        {syncPlatform === "Alchemy / Web3" 
+                          ? "Connecting your wallet will analyze your on-chain assets and transaction history to calculate your 35% weightage."
+                          : "Linking your domain confirms your official web presence and ownership of professional digital assets."}
+                     </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={submitSync}
+                  disabled={isSubmittingSync || !syncInputValue}
+                  className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20"
+                >
+                  {isSubmittingSync ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Syncing Protocol...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      Authorize & Verify Link
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
+
   );
 }

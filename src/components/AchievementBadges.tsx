@@ -94,7 +94,7 @@ export function AchievementBadges({ score, profile, breakdown }: AchievementBadg
       bgColor: "bg-amber-500/10",
       borderColor: "border-amber-500/20",
       glowColor: "shadow-amber-500/20",
-      earned: breakdown.crypto >= 40,
+      earned: breakdown.crypto >= 35,
     },
     {
       id: "top-10",

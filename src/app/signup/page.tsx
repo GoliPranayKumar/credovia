@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { ShieldCheck, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { ShieldCheck, Mail, Lock, User, ArrowRight, Loader2, Github } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function SignupPage() {
@@ -12,7 +12,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { signup } = useAuth();
+  const { signup, loginWithGithub } = useAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,10 +32,10 @@ export default function SignupPage() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-3xl bg-white border border-border/60 shadow-xl shadow-blue-100/20 space-y-8"
+        className="w-full max-w-md p-8 rounded-3xl bg-white border border-border/60 shadow-xl shadow-violet-100/20 space-y-8"
       >
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-blue-500/15 mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-violet-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-violet-500/15 mb-4">
             <ShieldCheck className="text-white w-10 h-10" />
           </div>
           <h1 className="text-3xl font-black">Create Account</h1>
@@ -56,7 +56,7 @@ export default function SignupPage() {
               <input 
                 type="text" 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-violet-400 focus:border-transparent outline-none transition-all"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -71,7 +71,7 @@ export default function SignupPage() {
               <input 
                 type="email" 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-violet-400 focus:border-transparent outline-none transition-all"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -86,7 +86,7 @@ export default function SignupPage() {
               <input 
                 type="password" 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-violet-400 focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -97,11 +97,28 @@ export default function SignupPage() {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/15 transition-all active:scale-95 flex items-center justify-center gap-2 border border-primary/20"
+            className="w-full bg-primary hover:bg-violet-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-violet-500/15 transition-all active:scale-95 flex items-center justify-center gap-2 border border-primary/20"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Get Started <ArrowRight className="w-5 h-5" /></>}
           </button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border"></span>
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={loginWithGithub}
+          className="w-full bg-[#24292e] hover:bg-[#2f363d] text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-3"
+        >
+          <Github className="w-6 h-6" /> GitHub
+        </button>
 
         <p className="text-center text-muted-foreground">
           Already have an account? <Link href="/login" className="text-primary font-bold hover:underline">Sign in</Link>
