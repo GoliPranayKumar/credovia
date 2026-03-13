@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 declare global {
   interface Window {
@@ -22,16 +23,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} gradient-bg min-h-screen antialiased`}>
-        <Navbar />
-        <main className="pt-24 pb-12 px-6">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
+        <ThemeProvider>
+          <Navbar />
+          <main className="pt-24 pb-12 px-6">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
-

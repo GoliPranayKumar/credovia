@@ -7,6 +7,7 @@ import { ScoreBadge } from "@/components/ScoreVisuals";
 import { Search as SearchIcon, Loader2, ArrowRight, User } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { VerificationBadges } from "@/components/VerificationBadges";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -105,6 +106,7 @@ export default function SearchPage() {
                   </div>
                   
                   <div className="flex items-center gap-6 mt-4 md:mt-0">
+                    <VerificationBadges profile={u} size="sm" />
                     <ScoreBadge score={u.score} />
                     <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all" />
                   </div>

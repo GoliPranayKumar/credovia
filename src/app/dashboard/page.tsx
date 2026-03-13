@@ -21,14 +21,21 @@ import {
   LayoutDashboard,
   Fingerprint,
   TrendingUp,
-  Users
+  Users,
+  Share2
 } from "lucide-react";
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite";
 import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
 import { motion, AnimatePresence } from "framer-motion";
 import { CertificateTemplate } from "@/components/CertificateTemplate";
+import { ShareScoreCard } from "@/components/ShareScoreCard";
+import { AchievementBadges } from "@/components/AchievementBadges";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { ProfileQRCode } from "@/components/ProfileQRCode";
+import { ProfileCustomizer, getAccentGradient } from "@/components/ProfileCustomizer";
 import html2canvas from "html2canvas";
-import jsPDF from "jsPDF";
+import jsPDF from "jspdf";
+import { getScoreLabel } from "@/lib/score";
 
 export default function DashboardPage() {
   const { user, profile, loading, logout, refresh } = useAuth();
@@ -37,6 +44,7 @@ export default function DashboardPage() {
   const [formData, setFormData] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
+  const [savingAccent, setSavingAccent] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -113,8 +121,47 @@ export default function DashboardPage() {
     }
   };
 
+  const downloadScoreCard = async () => {
+    const element = document.getElementById("credovia-share-card");
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+      });
+      const link = document.createElement("a");
+      link.download = `Credovia_ScoreCard_${profile.name.replace(/\s+/g, '_')}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("Score Card Generation Error:", err);
+      alert("Failed to generate score card.");
+    }
+  };
+
+  const saveAccentColor = async (accent: string) => {
+    setSavingAccent(true);
+    try {
+      await databases.updateDocument(
+        DATABASE_ID,
+        USERS_COLLECTION_ID,
+        profile.$id,
+        { accentColor: accent }
+      );
+      await refresh();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingAccent(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 text-foreground">
+      {/* Onboarding Wizard — shows once for new users */}
+      <OnboardingWizard />
       {/* Hidden Certificate */}
       <div className="fixed overflow-hidden h-0 w-0 pointer-events-none opacity-0">
         <CertificateTemplate 
@@ -122,6 +169,12 @@ export default function DashboardPage() {
           score={profile.score} 
           date={new Date().toLocaleDateString()} 
           certificateId={`CR-${profile.$id.slice(0, 8).toUpperCase()}`}
+        />
+        <ShareScoreCard
+          name={profile.name}
+          score={profile.score}
+          scoreLabel={getScoreLabel(profile.score)}
+          breakdown={calculateCredibilityScore(profile).breakdown}
         />
       </div>
 
@@ -205,6 +258,13 @@ export default function DashboardPage() {
             
             <div className="relative">
               <ScoreGauge score={profile.score} />
+              {/* Accent-coloured user avatar behind gauge */}
+              <div
+                className="w-12 h-12 rounded-2xl absolute -top-3 -right-3 flex items-center justify-center text-lg font-black text-white shadow-lg border-2 border-white dark:border-gray-800"
+                style={{ background: getAccentGradient(profile.accentColor) }}
+              >
+                {profile.name?.[0] || "U"}
+              </div>
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white border border-border px-3 py-1 rounded-full shadow-lg flex items-center gap-2">
                  <Fingerprint className="w-2.5 h-2.5 text-primary" />
                  <span className="text-[9px] font-black uppercase tracking-widest text-foreground">Identity PK</span>
@@ -243,7 +303,8 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="w-full pt-4 mt-2">
+            {/* Compact Download Card in Sidebar */}
+            <div className="w-full pt-4 mt-2 space-y-3">
               <button 
                 onClick={downloadCertificate}
                 className="w-full flex items-center justify-center gap-3 py-4 bg-primary text-white font-black rounded-2xl shadow-sm hover:translate-y-1 active:scale-95 transition-all group relative overflow-hidden border border-primary/20"
@@ -253,9 +314,22 @@ export default function DashboardPage() {
                 <span className="text-xs uppercase tracking-widest">Download Certificate</span>
                 <Download className="w-4 h-4" />
               </button>
+              <button 
+                onClick={downloadScoreCard}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-rose-500 via-pink-500 to-violet-500 text-white font-black rounded-2xl shadow-sm hover:-translate-y-0.5 active:scale-95 transition-all group relative overflow-hidden border border-rose-500/20"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <Share2 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                <span className="text-xs uppercase tracking-widest">Share Score Card</span>
+                <Download className="w-4 h-4" />
+              </button>
               <p className="text-[8px] text-muted-foreground mt-3 font-bold uppercase tracking-widest opacity-40">
                 Verifiable Protocol Artifact
               </p>
+              {/* QR Code */}
+              <div className="pt-1 flex justify-center">
+                <ProfileQRCode profileId={profile.$id} name={profile.name} />
+              </div>
             </div>
 
             {/* Space Filler: Protocol Rank & Health */}
@@ -365,6 +439,13 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
+                {/* Profile Color */}
+                <ProfileCustomizer
+                  currentAccent={profile.accentColor || "violet"}
+                  onSave={saveAccentColor}
+                  saving={savingAccent}
+                />
+
                 <div className="flex gap-3 pt-2">
                     <button 
                     type="submit"
@@ -428,6 +509,13 @@ export default function DashboardPage() {
         </main>
       </div>
 
+
+      {/* Achievement Badges */}
+      <AchievementBadges 
+        score={profile.score} 
+        profile={profile} 
+        breakdown={calculateCredibilityScore(profile).breakdown} 
+      />
 
       {/* Footer Meta */}
       <footer className="pt-8 text-center pb-12 border-t border-border mx-10">

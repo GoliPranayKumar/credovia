@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { User, ShieldCheck, Search, LayoutDashboard, LogOut } from "lucide-react";
+import { ShieldCheck, Search, LayoutDashboard, Sun, Moon, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { account } from "@/lib/appwrite";
+import { useTheme } from "@/components/ThemeProvider";
+import { NotificationsPanel } from "@/components/NotificationsPanel";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     account.get()
@@ -19,6 +22,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: "Search", href: "/search", icon: Search },
+    { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, protected: true },
   ];
 
@@ -52,25 +56,42 @@ export default function Navbar() {
           })}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="relative w-10 h-10 rounded-xl border border-border/60 bg-secondary/50 hover:bg-secondary flex items-center justify-center transition-all active:scale-90 overflow-hidden"
+            aria-label="Toggle theme"
+          >
+            <Sun className={cn(
+              "w-[18px] h-[18px] text-amber-500 absolute transition-all duration-300",
+              theme === "dark" ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
+            )} />
+            <Moon className={cn(
+              "w-[18px] h-[18px] text-violet-400 absolute transition-all duration-300",
+              theme === "dark" ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
+            )} />
+          </button>
+
+          {/* Notifications (only for logged-in users) */}
+          {user && <NotificationsPanel userId={user.$id} />}
+
           {user ? (
-            <Link 
-              href="/dashboard" 
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white"
+            <Link
+              href="/dashboard"
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-[14px] font-black text-white shadow-sm hover:scale-110 active:scale-95 transition-all border-2 border-white dark:border-gray-800"
             >
               {user.name?.[0] || "U"}
             </Link>
           ) : (
-            <Link 
-              href="/login" 
-              className="bg-primary hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-sm transition-all active:scale-95 border border-primary/20"
+            <Link
+              href="/login"
+              className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-sm transition-all active:scale-95"
             >
               Get Started
             </Link>
           )}
         </div>
-
-
       </div>
     </nav>
   );
