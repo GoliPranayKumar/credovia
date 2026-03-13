@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 export function HeroSequence() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -12,6 +13,8 @@ export function HeroSequence() {
 
   useEffect(() => {
     let loadedCount = 0;
+    const initialBatch = 20; 
+    let hasStarted = false;
     
     // Preload images
     for (let i = 1; i <= totalFrames; i++) {
@@ -22,15 +25,17 @@ export function HeroSequence() {
       img.onload = () => {
         loadedCount++;
         setProgress(Math.round((loadedCount / totalFrames) * 100));
-        if (loadedCount === totalFrames) {
+        
+        if (loadedCount >= initialBatch && !hasStarted) {
+          hasStarted = true;
           setLoaded(true);
         }
       };
       
       img.onerror = () => {
         loadedCount++;
-        setProgress(Math.round((loadedCount / totalFrames) * 100));
-        if (loadedCount === totalFrames) {
+        if (loadedCount >= initialBatch && !hasStarted) {
+          hasStarted = true;
           setLoaded(true);
         }
       };
@@ -70,14 +75,14 @@ export function HeroSequence() {
         const img = frames.current[currentFrame];
         if (img && img.complete && img.naturalHeight !== 0) {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            if (currentFrame >= totalFrames - 1) {
+              isFinished = true;
+              return;
+            }
+            
+            currentFrame++;
         }
-        
-        if (currentFrame >= totalFrames - 1) {
-          isFinished = true;
-          return;
-        }
-        
-        currentFrame++;
       }
 
       if (!isFinished) {
@@ -96,15 +101,16 @@ export function HeroSequence() {
   return (
     <div className="relative w-full aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-border/50 shadow-2xl glass bg-white dark:bg-black/20 flex flex-col items-center justify-center">
       {!loaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-black/80 z-10 p-6 space-y-4">
-          <div className="text-sm font-black uppercase tracking-widest text-primary">Loading High-Res Animation</div>
-          <div className="w-full max-w-[200px] h-2 bg-blue-100 dark:bg-blue-900 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-black/80 z-10 p-6 space-y-6">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse">Initializing Interface</div>
+          <div className="w-full max-w-[160px] h-[1px] bg-blue-100 dark:bg-blue-900 relative">
+            <motion.div 
+              className="absolute inset-y-0 left-0 bg-primary"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5 }}
             />
           </div>
-          <div className="text-[10px] text-muted-foreground font-bold">{progress}% / {totalFrames} Frames</div>
         </div>
       )}
       
