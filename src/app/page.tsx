@@ -32,7 +32,6 @@ export default function Home() {
             className="text-5xl md:text-7xl font-black tracking-tight leading-[1.1]"
           >
             Your Reputation in <br />
-            {/* Sleek, professional contrast: 'A Single' blends with the headline, 'Number' pops in the theme color */}
             <span className="drop-shadow-[0_2px_4px_rgba(139,92,246,0.15)]">
               <span>A Single </span>
               <span className="text-primary">Number.</span>
@@ -95,7 +94,7 @@ export default function Home() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
           {
-            title: "40% Crypto Analysis",
+            title: "35% Crypto Analysis",
             desc: "On-chain verification of wallet age, transaction frequency, and token diversity via Alchemy.",
             icon: ShieldCheck,
             color: "text-violet-600",

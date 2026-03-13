@@ -3,13 +3,14 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { ShieldCheck, Loader2, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
+// Force this page to skip static generation
 export const dynamic = 'force-dynamic';
 
-function VerifyEmailContent() {
+function VerifyEmailInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { verifyEmail } = useAuth();
@@ -27,13 +28,13 @@ function VerifyEmailContent() {
       setStatus("error");
       setErrorMessage("Invalid verification link.");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const handleVerify = async (userId: string, secret: string) => {
     try {
       await verifyEmail(userId, secret);
       setStatus("success");
-      // Redirect to dashboard after 3 seconds
       setTimeout(() => {
         router.push("/dashboard");
       }, 3000);
@@ -108,13 +109,13 @@ export default function VerifyEmailPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-black">Initializing Verification</h1>
-            <p className="text-muted-foreground">Preparing secure connection...</p>
+            <h1 className="text-2xl font-black">Connecting...</h1>
+            <p className="text-muted-foreground">Initializing secure verification protocol.</p>
           </div>
         </div>
       </div>
     }>
-      <VerifyEmailContent />
+      <VerifyEmailInner />
     </Suspense>
   );
 }

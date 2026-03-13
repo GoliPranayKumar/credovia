@@ -28,7 +28,7 @@ const STEPS = [
     title: "Connect Web3 Wallet",
     subtitle: "On-Chain Score",
     description:
-      "Add your Ethereum wallet address to earn up to 40 points — the largest category. We analyse token diversity, transaction history, and on-chain age.",
+      "Add your Ethereum wallet address to earn up to 35 points — the largest category. We analyse token diversity, transaction history, and on-chain age.",
     color: "from-cyan-500 to-emerald-500",
     tip: "Wallets with 6+ months of history score significantly higher.",
   },
