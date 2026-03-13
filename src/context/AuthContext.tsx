@@ -46,16 +46,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Optimize: Only sync identities if specifically requested or if it's been a while
         // This prevents massive API hit on every page load/refresh
+        const syncParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('sync') === 'true';
         const lastSync = localStorage.getItem(`last-sync-${session.$id}`);
-        const shouldSync = forceSync || !lastSync || Date.now() - parseInt(lastSync) > 1000 * 60 * 60; // once an hour
+        const shouldSync = forceSync || syncParam || !lastSync || Date.now() - parseInt(lastSync) > 1000 * 60 * 60; // once an hour
 
         if (shouldSync) {
+          console.log("DEBUG: Initiating identity synchronization...");
           try {
             const identities = await account.listIdentities();
-            const githubId = identities.identities.find(i => i.provider === "github");
+            console.log("DEBUG: Identities found:", identities.identities.length);
             
+            const githubId = identities.identities.find(i => i.provider === "github");
             if (githubId) {
-              const ghRes = await fetch(`https://api.github.com/user/${githubId.providerUid}`);
+              console.log("DEBUG: Found GitHub identity, fetching stats...");
+              const ghRes = await withRetry(() => fetch(`https://api.github.com/user/${githubId.providerUid}`));
               const ghData = await ghRes.json();
               
               if (ghData.login) {
@@ -64,41 +68,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 let totalStars = 0;
                 let totalCommits = 0;
                 try {
-                  const [starsRes, commitRes] = await Promise.all([
-                    fetch(`https://api.github.com/users/${ghData.login}/repos?per_page=100`),
-                    fetch(`https://api.github.com/search/commits?q=author:${ghData.login}`)
+                  const [repos, commuteData] = await Promise.all([
+                    withRetry(() => fetch(`https://api.github.com/users/${ghData.login}/repos?per_page=100`).then(r => r.json())),
+                    withRetry(() => fetch(`https://api.github.com/search/commits?q=author:${ghData.login}`).then(r => r.json()))
                   ]);
                   
-                  const repos = await starsRes.json();
                   if (Array.isArray(repos)) {
                     totalStars = repos.reduce((acc: number, repo: any) => acc + (repo.stargazers_count || 0), 0);
                   }
-
-                  const commuteData = await commitRes.json();
                   totalCommits = commuteData.total_count || 0;
-                } catch (e) {}
+                } catch (ghApiErr) {
+                  console.warn("DEBUG: GitHub secondary stats fetch failed:", ghApiErr);
+                }
+
+                // Prepare update data
+                const updateData: any = {
+                  github: verifiedUrl,
+                  githubRepoCount: ghData.public_repos || 0,
+                  githubFollowerCount: ghData.followers || 0,
+                  githubFollowingCount: ghData.following || 0,
+                  githubGistCount: ghData.public_gists || 0,
+                  githubContributionCount: totalCommits,
+                  githubStarCount: totalStars,
+                  githubCreatedAt: ghData.created_at
+                };
+
+                // CRITICAL: Recalculate score with new data!
+                const { calculateCredibilityScore } = await import("@/lib/score");
+                const { total: newScore } = calculateCredibilityScore({ ...currentProfile, ...updateData });
+                updateData.score = newScore;
 
                 if (
                   currentProfile.github !== verifiedUrl || 
-                  currentProfile.githubRepoCount !== ghData.public_repos ||
-                  currentProfile.githubStarCount !== totalStars ||
-                  currentProfile.githubContributionCount !== totalCommits
+                  currentProfile.githubRepoCount !== updateData.githubRepoCount ||
+                  currentProfile.score !== newScore
                 ) {
+                  console.log("DEBUG: Updating profile with new GitHub stats and score:", newScore);
                   currentProfile = await withRetry(() => 
                     databases.updateDocument(
                       DATABASE_ID,
                       USERS_COLLECTION_ID,
                       currentProfile.$id,
-                      {
-                        github: verifiedUrl,
-                        githubRepoCount: ghData.public_repos,
-                        githubFollowerCount: ghData.followers,
-                        githubFollowingCount: ghData.following,
-                        githubGistCount: ghData.public_gists,
-                        githubContributionCount: totalCommits,
-                        githubStarCount: totalStars,
-                        githubCreatedAt: ghData.created_at
-                      }
+                      updateData
                     )
                   );
                 }
@@ -107,19 +118,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             const linkedinId = identities.identities.find(i => i.provider === "linkedin");
             if (linkedinId && !currentProfile.linkedin) {
+              console.log("DEBUG: Found LinkedIn identity, marking as verified.");
+              const updateData: any = { linkedin: `https://linkedin.com/appwrite-verified-user` };
+              
+              const { calculateCredibilityScore } = await import("@/lib/score");
+              const { total: newScore } = calculateCredibilityScore({ ...currentProfile, ...updateData });
+              updateData.score = newScore;
+
               currentProfile = await withRetry(() => 
                 databases.updateDocument(
                   DATABASE_ID,
                   USERS_COLLECTION_ID,
                   currentProfile.$id,
-                  { linkedin: `https://linkedin.com/appwrite-verified-user` }
+                  updateData
                 )
               );
             }
             
             localStorage.setItem(`last-sync-${session.$id}`, Date.now().toString());
+            console.log("DEBUG: Sync completed successfully.");
           } catch (e) {
-            console.warn("Identity sync failed, skipping auto-sync", e);
+            console.error("DEBUG: Sync failed:", e);
           }
         }
 
@@ -174,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGithub = async () => {
     account.createOAuth2Session(
       OAuthProvider.Github,
-      `${window.location.origin}/dashboard`,
+      `${window.location.origin}/dashboard?sync=true`,
       `${window.location.origin}/login`
     );
   };
@@ -182,7 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithLinkedin = async () => {
     account.createOAuth2Session(
       OAuthProvider.Linkedin,
-      `${window.location.origin}/dashboard`,
+      `${window.location.origin}/dashboard?sync=true`,
       `${window.location.origin}/login`
     );
   };

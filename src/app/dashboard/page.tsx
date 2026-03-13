@@ -80,13 +80,17 @@ function DashboardContent() {
   const [syncInputValue, setSyncInputValue] = useState("");
   const [isSubmittingSync, setIsSubmittingSync] = useState(false);
 
-  const handleSync = (platform: string) => {
+  const handleSync = async (platform: string) => {
     if (platform === "GitHub SSO") {
-       loginWithGithub();
+       setSyncing("GitHub SSO");
+       // Small delay to show state before redirect
+       setTimeout(() => loginWithGithub(), 500);
        return;
     }
     if (platform === "LinkedIn") {
-       loginWithLinkedin();
+       setSyncing("LinkedIn");
+       // Small delay to show state before redirect
+       setTimeout(() => loginWithLinkedin(), 500);
        return;
     }
     
@@ -401,8 +405,19 @@ function DashboardContent() {
               </p>
            </div>
            
-           <div className="flex flex-wrap gap-3">
-               {/* Actions moved to Navbar dropdown */}
+           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+             <button
+               onClick={async () => {
+                 setSyncing("global");
+                 await refresh();
+                 setSyncing(null);
+               }}
+               disabled={syncing === "global"}
+               className="flex items-center gap-2 px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all disabled:opacity-50"
+             >
+               {syncing === "global" ? <Loader2 className="w-3 h-3 animate-spin"/> : <RefreshCw className="w-3 h-3" />}
+               Sync Protocol Data
+             </button>
            </div>
         </div>        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             {[
