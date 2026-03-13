@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { ShieldCheck, Mail, Lock, User, ArrowRight, Loader2, Github } from "lucide-react";
+import { ShieldCheck, Mail, Lock, User, ArrowRight, Loader2, Github, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function SignupPage() {
@@ -12,6 +13,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { signup, loginWithGithub } = useAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -34,12 +36,16 @@ export default function SignupPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md p-8 rounded-3xl bg-white border border-border/60 shadow-xl shadow-violet-100/20 space-y-8"
       >
-        <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-violet-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-violet-500/15 mb-4">
-            <ShieldCheck className="text-white w-10 h-10" />
+        <div className="text-center space-y-3">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo.png" 
+              alt="Credovia Logo" 
+              className="h-24 w-auto object-contain brightness-110"
+            />
           </div>
-          <h1 className="text-3xl font-black">Create Account</h1>
-          <p className="text-muted-foreground">Start building your digital reputation</p>
+          <h1 className="text-3xl font-black tracking-tight">Create Account</h1>
+          <p className="text-sm text-muted-foreground">Start building your digital reputation</p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
@@ -81,16 +87,23 @@ export default function SignupPage() {
 
           <div className="space-y-2">
             <label className="text-sm font-semibold ml-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 required
-                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-violet-400 focus:border-transparent outline-none transition-all"
+                className="w-full bg-white border border-border rounded-2xl py-4 pl-12 pr-12 focus:ring-2 focus:ring-violet-400 focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 

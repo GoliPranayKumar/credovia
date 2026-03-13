@@ -96,9 +96,9 @@ export default function Home() {
           {
             title: "35% Crypto Analysis",
             desc: "On-chain verification of wallet age, transaction frequency, and token diversity via Alchemy.",
-            icon: ShieldCheck,
+            logo: "/logo.png",
             color: "text-violet-600",
-            bg: "bg-violet-50",
+            bg: "bg-white",
             borderColor: "border-violet-100"
           },
           {
@@ -126,8 +126,12 @@ export default function Home() {
             transition={{ delay: i * 0.1 }}
             className="p-8 rounded-3xl glass hover:border-violet-200 transition-colors space-y-4 shadow-sm group"
           >
-            <div className={`w-12 h-12 ${f.bg} rounded-xl flex items-center justify-center ${f.color} border ${f.borderColor} shadow-inner group-hover:scale-110 transition-transform`}>
-              <f.icon className="w-6 h-6" />
+            <div className={`w-14 h-14 ${f.bg} rounded-xl flex items-center justify-center ${f.color} border ${f.borderColor} shadow-inner group-hover:scale-110 transition-transform`}>
+              {f.logo ? (
+                <img src={f.logo} alt="feature icon" className="w-11 h-11 object-contain" />
+              ) : f.icon ? (
+                <f.icon className="w-7 h-7" />
+              ) : null}
             </div>
             <h3 className="text-xl font-bold">{f.title}</h3>
             <p className="text-muted-foreground leading-relaxed">{f.desc}</p>

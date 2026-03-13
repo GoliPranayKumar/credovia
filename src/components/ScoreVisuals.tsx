@@ -31,7 +31,7 @@ export function ScoreBadge({ score, size = "md" }: ScoreBadgeProps) {
       colorClass,
       sizeClasses[size]
     )}>
-      <ShieldCheck className={cn(size === "sm" ? "w-3 h-3" : "w-5 h-5")} />
+      <img src="/logo.png" alt="logo" className={cn(size === "sm" ? "w-3 h-3" : "w-5 h-5", "object-contain")} />
       <span>{score} - {label}</span>
     </div>
   );

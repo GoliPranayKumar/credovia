@@ -49,12 +49,11 @@ export function CertificateTemplate({ name, score, date, certificateId }: Certif
       {/* Header */}
       <div style={{ zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#2563eb' }}>
-            <ShieldCheck style={{ width: '32px', height: '32px', color: 'white' }} />
-          </div>
-          <span style={{ fontSize: '30px', fontWeight: 900, letterSpacing: '-0.025em', color: '#0f172a' }}>
-              Credo<span style={{ color: '#2563eb' }}>via</span>
-          </span>
+          <img 
+            src="/logo.png" 
+            alt="Credovia Logo" 
+            style={{ height: '65px', width: 'auto', objectFit: 'contain' }} 
+          />
         </div>
         <div style={{ height: '1px', width: '96px', backgroundColor: '#2563eb', margin: '0 auto' }} />
       </div>
@@ -108,7 +107,11 @@ export function CertificateTemplate({ name, score, date, certificateId }: Certif
       </div>
 
       {/* Signature Watermark */}
-      <ShieldCheck style={{ position: 'absolute', bottom: '48px', left: '50%', transform: 'translateX(-50%)', width: '192px', height: '192px', color: '#2563eb', opacity: 0.04, zIndex: 1 }} />
+      <img 
+        src="/logo.png" 
+        style={{ position: 'absolute', bottom: '48px', left: '50%', transform: 'translateX(-50%)', width: '300px', height: 'auto', opacity: 0.04, zIndex: 1, filter: 'grayscale(100%)' }} 
+        alt="Watermark"
+      />
     </div>
 
 

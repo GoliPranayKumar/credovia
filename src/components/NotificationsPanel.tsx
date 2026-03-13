@@ -152,7 +152,8 @@ export function NotificationsPanel({ userId }: { userId?: string }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ duration: 0.18 }}
-            className="absolute right-0 top-14 w-80 bg-white dark:bg-card rounded-2xl border border-border shadow-2xl shadow-violet-500/10 z-50 overflow-hidden"
+            className="absolute right-0 md:-right-2 top-14 w-[calc(100vw-2rem)] sm:w-80 bg-white dark:bg-card rounded-2xl border border-border shadow-2xl shadow-violet-500/10 z-50 overflow-hidden"
+            style={{ maxWidth: "320px", left: "auto", right: "0" }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">

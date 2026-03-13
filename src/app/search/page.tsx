@@ -47,18 +47,18 @@ export default function SearchPage() {
   return (
     <div className="space-y-12 max-w-4xl mx-auto min-h-[70vh]">
       <div className="text-center space-y-4">
-        <h1 className="text-5xl font-black">Find Trusted People</h1>
-        <p className="text-xl text-muted-foreground">Search the directory by name to view credibility scores.</p>
+        <h1 className="text-4xl md:text-5xl font-black">Find Trusted People</h1>
+        <p className="text-lg md:text-xl text-muted-foreground px-4">Search the directory by name to view credibility scores.</p>
       </div>
 
-      <form onSubmit={handleSearch} className="relative group">
+      <form onSubmit={handleSearch} className="relative group px-4 md:px-0">
         <div className="absolute inset-x-0 -bottom-2 h-4 bg-blue-400/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
-        <div className="relative flex gap-4">
+        <div className="relative flex flex-col sm:flex-row gap-3 md:gap-4">
           <div className="relative flex-1">
-            <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
+            <SearchIcon className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
             <input 
               type="text" 
-              className="w-full bg-white border border-border rounded-[2rem] py-6 pl-16 pr-6 focus:ring-4 focus:ring-blue-200 focus:border-blue-300 outline-none transition-all text-xl font-medium shadow-sm"
+              className="w-full bg-white border border-border rounded-2xl md:rounded-[2rem] py-4 md:py-6 pl-12 md:pl-16 pr-6 focus:ring-4 focus:ring-blue-200 focus:border-blue-300 outline-none transition-all text-lg md:text-xl font-medium shadow-sm"
               placeholder="Search for a name..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -66,7 +66,7 @@ export default function SearchPage() {
           </div>
           <button 
             type="submit"
-            className="px-8 py-6 bg-primary text-white font-bold rounded-[2rem] shadow-xl shadow-blue-500/15 hover:bg-blue-600 hover:scale-[1.02] active:scale-95 transition-all text-xl border border-primary/20"
+            className="w-full sm:w-auto px-8 py-4 md:py-6 bg-primary text-white font-bold rounded-2xl md:rounded-[2rem] shadow-xl shadow-blue-500/15 hover:bg-blue-600 hover:scale-[1.02] active:scale-95 transition-all text-lg md:text-xl border border-primary/20"
           >
             Search
           </button>
@@ -93,22 +93,24 @@ export default function SearchPage() {
               >
                 <Link 
                   href={`/profile/${u.$id}`}
-                  className="group flex flex-col md:flex-row items-center justify-between p-6 rounded-3xl bg-white border border-border/60 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-100/30 transition-all"
+                  className="group flex flex-col sm:flex-row items-center justify-between p-5 md:p-6 rounded-3xl bg-white border border-border/60 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-100/30 transition-all gap-4"
                 >
-                  <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-2xl font-black text-white group-hover:scale-110 transition-transform shadow-md">
+                  <div className="flex items-center gap-4 md:gap-6 w-full sm:w-auto">
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-xl md:text-2xl font-black text-white group-hover:scale-110 transition-transform shadow-md shrink-0">
                       {u.name[0]}
                     </div>
-                    <div>
-                      <h4 className="text-xl font-bold group-hover:text-primary transition-colors">{u.name}</h4>
-                      <p className="text-sm text-muted-foreground line-clamp-1 max-w-xs">{u.bio || "No bio provided"}</p>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-lg md:text-xl font-bold group-hover:text-primary transition-colors truncate">{u.name}</h4>
+                      <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">{u.bio || "No bio provided"}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-6 mt-4 md:mt-0">
-                    <VerificationBadges profile={u} size="sm" />
-                    <ScoreBadge score={u.score} />
-                    <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all" />
+                  <div className="flex items-center justify-between sm:justify-end gap-3 md:gap-6 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-border/50">
+                    <div className="flex items-center gap-2 md:gap-6">
+                      <VerificationBadges profile={u} size="sm" />
+                      <ScoreBadge score={u.score} size="sm" />
+                    </div>
+                    <ArrowRight className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all" />
                   </div>
                 </Link>
               </motion.div>

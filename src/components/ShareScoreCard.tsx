@@ -107,12 +107,11 @@ export function ShareScoreCard({ name, score, scoreLabel, breakdown }: ShareScor
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", paddingLeft: "60px", position: "relative", zIndex: 10 }}>
         {/* Brand */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
-          <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "linear-gradient(135deg, #8b5cf6, #06b6d4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ShieldCheck style={{ width: "22px", height: "22px", color: "white" }} />
-          </div>
-          <span style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.02em" }}>
-            Credo<span style={{ color: "#8b5cf6" }}>via</span>
-          </span>
+          <img 
+            src="/logo.png" 
+            alt="Credovia Logo" 
+            style={{ height: "45px", width: "auto", objectFit: "contain" }} 
+          />
         </div>
 
         {/* Name */}

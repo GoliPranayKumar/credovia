@@ -132,25 +132,6 @@ export function useAuth() {
   }
 
   async function login(email: string, pass: string) {
-    if (email === "demo@credovia.com") {
-      localStorage.setItem("demo_mode", "true");
-      setUser({ $id: "demo_user", name: "Demo User", email: "demo@credovia.com" });
-      setProfile({
-        $id: "demo_profile",
-        userId: "demo_user",
-        name: "Demo User",
-        bio: "This is a demo account. You can explore the dashboard and search features.",
-        github: "https://github.com/demo",
-        linkedin: "https://linkedin.com/in/demo",
-        portfolio: "https://demo.com",
-        walletAddress: "0x1234...5678",
-        score: 85,
-        $createdAt: new Date().toISOString()
-      });
-      router.push("/dashboard");
-      return;
-    }
-
     try {
       await account.createEmailPasswordSession(email, pass);
       await checkAuth();
@@ -253,7 +234,6 @@ export function useAuth() {
   }
 
   async function logout() {
-    localStorage.removeItem("demo_mode");
     try {
       await account.deleteSession("current");
     } catch (e) {}

@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     }
 
     // Since third-party LinkedIn APIs are often paid/unstable, 
-    // we use a High-Fidelity Professional Simulation for this demo
+    // we use a High-Fidelity Professional Simulation 
     // and combine it with the official SSO verification status.
     
     // Simulate network delay for realism

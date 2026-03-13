@@ -91,8 +91,12 @@ export function OnboardingWizard() {
             <div className="p-8 space-y-6">
               {/* Header */}
               <div className="flex items-start justify-between">
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${current.color} flex items-center justify-center shadow-lg`}>
-                  <Icon className="w-7 h-7 text-white" />
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden ${step === 0 ? "bg-white border border-border" : `bg-gradient-to-br ${current.color}`}`}>
+                  {step === 0 ? (
+                    <img src="/logo.png" alt="logo" className="w-10 h-10 object-contain" />
+                  ) : (
+                    <Icon className="w-7 h-7 text-white" />
+                  )}
                 </div>
                 <button
                   onClick={close}

@@ -88,32 +88,34 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-12 max-w-5xl mx-auto">
       {/* Profile Header */}
-      <section className="p-8 md:p-12 rounded-[3rem] bg-white border border-border/60 shadow-sm flex flex-col md:flex-row gap-10 items-center md:items-start">
-        <div className="w-40 h-40 rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-6xl font-black text-white shadow-2xl shadow-blue-500/20">
+      <section className="p-6 md:p-12 rounded-3xl md:rounded-[3rem] bg-white border border-border/60 shadow-sm flex flex-col items-center md:items-start md:flex-row gap-6 md:gap-10">
+        <div className="w-24 h-24 md:w-40 md:h-40 rounded-2xl md:rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-4xl md:text-6xl font-black text-white shadow-2xl shadow-blue-500/20 shrink-0">
           {profile.name[0]}
         </div>
         
-        <div className="flex-1 text-center md:text-left space-y-4">
+        <div className="flex-1 text-center md:text-left space-y-4 w-full">
           <div className="space-y-1">
-            <h1 className="text-5xl font-black tracking-tight">{profile.name}</h1>
-            <p className="text-xl text-muted-foreground">{profile.bio || "No bio available"}</p>
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight">{profile.name}</h1>
+            <p className="text-base md:text-xl text-muted-foreground">{profile.bio || "No bio available"}</p>
           </div>
           
-          <div className="flex flex-wrap justify-center md:justify-start gap-4">
-             {profile.github && <a href={profile.github} target="_blank" className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800"><Github className="w-5 h-5"/> GitHub</a>}
-             {profile.linkedin && <a href={profile.linkedin} target="_blank" className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800"><Linkedin className="w-5 h-5"/> LinkedIn</a>}
-             {profile.portfolio && <a href={profile.portfolio} target="_blank" className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800"><Globe className="w-5 h-5"/> Portfolio</a>}
-             {profile.walletAddress && <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 text-blue-700 font-bold"><ShieldCheck className="w-5 h-5"/> Web3 Verified</div>}
+          <div className="flex flex-wrap justify-center md:justify-start gap-2 md:gap-4">
+             {profile.github && <a href={profile.github} target="_blank" className="flex items-center gap-2 bg-blue-50 px-3 md:px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800 text-xs md:text-sm"><Github className="w-4 h-4 md:w-5 md:h-5"/> GitHub</a>}
+             {profile.linkedin && <a href={profile.linkedin} target="_blank" className="flex items-center gap-2 bg-blue-50 px-3 md:px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800 text-xs md:text-sm"><Linkedin className="w-4 h-4 md:w-5 md:h-5"/> LinkedIn</a>}
+             {profile.portfolio && <a href={profile.portfolio} target="_blank" className="flex items-center gap-2 bg-blue-50 px-3 md:px-4 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors text-blue-800 text-xs md:text-sm"><Globe className="w-4 h-4 md:w-5 md:h-5"/> Portfolio</a>}
+             {profile.walletAddress && <div className="flex items-center gap-2 bg-blue-50 px-3 md:px-4 py-2 rounded-xl border border-blue-200 text-blue-700 font-bold text-xs md:text-sm"><img src="/logo.png" alt="logo" className="w-4 h-4 md:w-5 md:h-5 object-contain" /> Web3 Verified</div>}
           </div>
 
           {/* Verification Badges */}
-          <div className="pt-2">
+          <div className="pt-2 flex justify-center md:justify-start">
             <VerificationBadges profile={profile} />
           </div>
 
-          <div className="pt-4 flex items-center gap-3 flex-wrap">
-            <ScoreBadge score={profile.score} size="lg" />
-            <ProfileQRCode profileId={profile.$id} name={profile.name} />
+          <div className="pt-4 flex items-center justify-center md:justify-start gap-3 flex-wrap">
+            <ScoreBadge score={profile.score} size="md" />
+            <div className="scale-75 md:scale-100 origin-center md:origin-left">
+               <ProfileQRCode profileId={profile.$id} name={profile.name} />
+            </div>
           </div>
         </div>
       </section>
@@ -123,7 +125,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
         <div className="lg:col-span-2 space-y-8">
            <div className="p-8 rounded-[2.5rem] bg-white border border-border/60 shadow-sm space-y-6">
                 <h3 className="text-xl font-bold flex items-center gap-2">
-                    <ShieldCheck className="w-6 h-6 text-primary" />
+                    <img src="/logo.png" alt="logo" className="w-6 h-6 object-contain" />
                     Authenticity Report
                 </h3>
                 <div className="flex justify-center py-6">

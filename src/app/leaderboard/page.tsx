@@ -53,11 +53,11 @@ export default function LeaderboardPage() {
 
       {/* Top 3 Podium */}
       {!loading && users.length >= 3 && (
-        <div className="grid grid-cols-3 gap-4 items-end mb-8">
+        <div className="grid grid-cols-3 gap-3 md:gap-4 items-end mb-8 px-2 md:px-0">
           {[users[1], users[0], users[2]].map((u, podiumIdx) => {
             const rank = podiumIdx === 1 ? 1 : podiumIdx === 0 ? 2 : 3;
             const s = rankStyles[rank];
-            const heights = ["h-28", "h-36", "h-24"];
+            const heights = ["h-24 md:h-28", "h-32 md:h-36", "h-20 md:h-24"];
             return (
               <motion.div
                 key={u.$id}
@@ -66,27 +66,27 @@ export default function LeaderboardPage() {
                 transition={{ delay: podiumIdx * 0.15 }}
               >
                 <Link href={`/profile/${u.$id}`} className="group block">
-                  <div className="flex flex-col items-center gap-3 mb-3">
+                  <div className="flex flex-col items-center gap-2 md:gap-3 mb-3">
                     <div className={cn(
-                      "w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-2xl font-black text-white shadow-xl ring-2 transition-all group-hover:scale-110",
+                      "w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-xl md:text-2xl font-black text-white shadow-xl ring-2 transition-all group-hover:scale-110",
                       s.ring, s.glow
                     )}>
                       {u.name[0]}
                     </div>
-                    <div className="text-center">
-                      <p className="font-black text-sm text-foreground truncate max-w-[100px]">{u.name}</p>
-                      <p className="text-xs font-black" style={{ color: "currentColor" }}>
+                    <div className="text-center w-full min-w-0">
+                      <p className="font-black text-[10px] md:text-sm text-foreground truncate px-1">{u.name}</p>
+                      <p className="text-[10px] md:text-xs font-black">
                         <span className={s.medal}>{u.score}</span>
-                        <span className="text-muted-foreground"> pts</span>
+                        <span className="text-muted-foreground hidden sm:inline"> pts</span>
                       </p>
                     </div>
                   </div>
                   <div className={cn(
-                    "rounded-t-2xl flex items-center justify-center border border-b-0 bg-gradient-to-t from-muted/40 to-background",
+                    "rounded-t-2xl flex items-center justify-center border border-b-0 bg-gradient-to-t from-muted/40 to-background shadow-inner",
                     heights[podiumIdx],
                     rank === 1 ? "border-amber-400/30" : rank === 2 ? "border-slate-400/30" : "border-orange-400/30"
                   )}>
-                    <span className={cn("text-3xl font-black", s.medal)}>#{rank}</span>
+                    <span className={cn("text-2xl md:text-3xl font-black", s.medal)}>#{rank}</span>
                   </div>
                 </Link>
               </motion.div>
@@ -96,7 +96,7 @@ export default function LeaderboardPage() {
       )}
 
       {/* Full List */}
-      <div className="space-y-3">
+      <div className="space-y-3 px-2 md:px-0">
         {loading ? (
           <div className="flex justify-center p-16">
             <Loader2 className="w-12 h-12 animate-spin text-violet-500" />
@@ -114,15 +114,15 @@ export default function LeaderboardPage() {
               >
                 <Link
                   href={`/profile/${u.$id}`}
-                  className="group flex items-center gap-5 p-5 rounded-2xl bg-white border border-border/60 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/20 dark:bg-card transition-all"
+                  className="group flex items-center gap-3 md:gap-5 p-4 md:p-5 rounded-2xl bg-white border border-border/60 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/20 dark:bg-card transition-all"
                 >
                   {/* Rank */}
                   <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0",
+                    "w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-xs md:text-sm font-black shrink-0",
                     rank <= 3 ? `${s?.medal} bg-current/10` : "text-muted-foreground bg-muted/50"
                   )}>
                     {rank <= 3 ? (
-                      <Medal className={cn("w-5 h-5", s?.medal)} />
+                      <Medal className={cn("w-4 h-4 md:w-5 md:h-5", s?.medal)} />
                     ) : (
                       <span>{rank}</span>
                     )}
@@ -131,7 +131,7 @@ export default function LeaderboardPage() {
                   {/* Avatar */}
                   <div
                     className={cn(
-                      "w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-md group-hover:scale-110 transition-transform shrink-0",
+                      "w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center text-lg md:text-xl font-black text-white shadow-md group-hover:scale-110 transition-transform shrink-0",
                       rank <= 3 ? `ring-2 ${s?.ring}` : ""
                     )}
                     style={{ background: "linear-gradient(135deg, #8b5cf6, #06b6d4)" }}
@@ -141,15 +141,15 @@ export default function LeaderboardPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-black text-base text-foreground group-hover:text-violet-600 transition-colors truncate">
+                    <h4 className="font-black text-sm md:text-base text-foreground group-hover:text-violet-600 transition-colors truncate">
                       {u.name}
                     </h4>
-                    <p className="text-xs text-muted-foreground truncate">{u.bio || "No bio"}</p>
+                    <p className="text-[10px] md:text-xs text-muted-foreground truncate">{u.bio || "No bio"}</p>
                   </div>
 
                   {/* Verification + Score */}
-                  <div className="flex items-center gap-4 shrink-0">
-                    <div className="hidden md:block">
+                  <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                    <div className="hidden lg:block">
                       <VerificationBadges profile={u} size="sm" />
                     </div>
                     <ScoreBadge score={u.score} size="sm" />
