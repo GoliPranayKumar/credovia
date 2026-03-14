@@ -9,6 +9,7 @@ export interface Profile {
   githubFollowingCount?: number;
   githubGistCount?: number;
   githubContributionCount?: number;
+  githubPRCount?: number;
   githubCreatedAt?: string;
   linkedin?: string;
   portfolio?: string;
@@ -78,7 +79,9 @@ export function calculateCredibilityScore(profile: Profile, reviewCount: number 
     }
 
     // Community & Contributions (Max 5 points)
-    const combinedActivity = (profile.githubFollowerCount || 0) + (profile.githubContributionCount || 0) / 10;
+    const combinedActivity = (profile.githubFollowerCount || 0) + 
+                             (profile.githubContributionCount || 0) / 10 +
+                             (profile.githubPRCount || 0) / 5;
     if (combinedActivity >= 50) breakdown.github += 5;
     else if (combinedActivity >= 10) breakdown.github += 3;
     else if (combinedActivity > 0) breakdown.github += 1;

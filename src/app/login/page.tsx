@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, Github, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
@@ -13,7 +14,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loginWithGithub } = useAuth();
+  const { login, loginWithGithub, user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +29,7 @@ export default function LoginPage() {
     setError("");
     try {
       await login(email, password);
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Failed to login. Please check your credentials.");
     } finally {

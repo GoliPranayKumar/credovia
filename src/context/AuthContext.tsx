@@ -12,11 +12,13 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<void>;
   loginWithGithub: () => Promise<void>;
   loginWithLinkedin: () => Promise<void>;
-  signup: (email: string, pass: string, name: string) => Promise<void>;
+  signup: (email: string, pass: string, name: string) => Promise<string>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
   sendVerificationEmail: () => Promise<any>;
   verifyEmail: (userId: string, secret: string) => Promise<void>;
+  sendEmailToken: (email: string) => Promise<string>;
+  loginWithToken: (userId: string, secret: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -67,16 +69,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 
                 let totalStars = 0;
                 let totalCommits = 0;
+                let totalPRs = 0;
                 try {
-                  const [repos, commuteData] = await Promise.all([
+                  const [repos, commuteData, prData] = await Promise.all([
                     withRetry(() => fetch(`https://api.github.com/users/${ghData.login}/repos?per_page=100`).then(r => r.json())),
-                    withRetry(() => fetch(`https://api.github.com/search/commits?q=author:${ghData.login}`).then(r => r.json()))
+                    withRetry(() => fetch(`https://api.github.com/search/commits?q=author:${ghData.login}`).then(r => r.json())),
+                    withRetry(() => fetch(`https://api.github.com/search/issues?q=author:${ghData.login}+type:pr`).then(r => r.json()))
                   ]);
                   
                   if (Array.isArray(repos)) {
                     totalStars = repos.reduce((acc: number, repo: any) => acc + (repo.stargazers_count || 0), 0);
                   }
                   totalCommits = commuteData.total_count || 0;
+                  totalPRs = prData.total_count || 0;
                 } catch (ghApiErr) {
                   console.warn("DEBUG: GitHub secondary stats fetch failed:", ghApiErr);
                 }
@@ -89,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   githubFollowingCount: ghData.following || 0,
                   githubGistCount: ghData.public_gists || 0,
                   githubContributionCount: totalCommits,
+                  githubPRCount: totalPRs,
                   githubStarCount: totalStars,
                   githubCreatedAt: ghData.created_at
                 };
@@ -209,17 +215,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (email: string, pass: string, name: string) => {
     setLoading(true);
     try {
-      await account.create(ID.unique(), email, pass, name);
-      await account.createEmailPasswordSession(email, pass);
-      const session = await account.get();
-      setUser(session);
+      // 1. Create the account
+      const newUser = await account.create(ID.unique(), email, pass, name);
+      const userId = newUser.$id;
       
-      const newProfile = await databases.createDocument(
+      // 2. Create the profile document (can be done before login if permissions allow, 
+      // or we can wait until after OTP. Let's do it now so the record exists)
+      await databases.createDocument(
         DATABASE_ID,
         USERS_COLLECTION_ID,
         ID.unique(),
         {
-          userId: session.$id,
+          userId: userId,
           name: name || "Anonymous User",
           email: email,
           bio: "Protocol initialization...",
@@ -230,8 +237,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           score: 0
         }
       );
-      setProfile(newProfile);
-      await account.createVerification(`${window.location.origin}/verify-email`);
+
+      // 3. Trigger the email OTP/Token
+      await account.createEmailToken(userId, email);
+      
+      return userId;
     } finally {
       setLoading(false);
     }
@@ -254,13 +264,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await account.updateVerification(userId, secret);
     await checkAuth(true);
   };
+  
+  const sendEmailToken = async (email: string) => {
+    // Deterministic ID for guest verification (sanitized email)
+    const sanitizedEmail = email.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const deterministicId = "v" + sanitizedEmail.substring(0, 30);
+    
+    try {
+      try {
+        // Try creating guest user first (to ensure ID exists if it doesn't)
+        await account.create(deterministicId, email, ID.unique());
+      } catch (e) { /* Ignore if exists */ }
+
+      const token = await account.createEmailToken(deterministicId, email);
+      return token.userId;
+    } catch (err: any) {
+      // If 409, it exists, just send the token
+      if (err.code === 409) {
+        const token = await account.createEmailToken(deterministicId, email);
+        return token.userId;
+      }
+      throw err;
+    }
+  };
+
+  const loginWithToken = async (userId: string, secret: string) => {
+    setLoading(true);
+    try {
+      // Important: Appwrite client-side only supports one active session easily.
+      // We attempt to create the session. If it says 'session already active', we delete 'current' and retry.
+      try {
+        const session = await account.createSession(userId, secret);
+        setUser(session);
+        await checkAuth(true); // Sync profile
+      } catch (err: any) {
+        if (err.code === 401 || err.message?.includes("active")) {
+           await account.deleteSession("current");
+           const session = await account.createSession(userId, secret);
+           setUser(session);
+           await checkAuth(true);
+        } else {
+          throw err;
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AuthContext.Provider value={{ 
       user, profile, loading, 
       login, loginWithGithub, loginWithLinkedin, 
       signup, logout, refresh: () => checkAuth(true),
-      sendVerificationEmail, verifyEmail 
+      sendVerificationEmail, verifyEmail,
+      sendEmailToken, loginWithToken
     }}>
       {children}
     </AuthContext.Provider>

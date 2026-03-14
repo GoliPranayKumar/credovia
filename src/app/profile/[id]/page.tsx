@@ -50,20 +50,36 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
     }
 
     try {
-      const [p, r] = await Promise.all([
-        withRetry(() => databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, id)),
-        withRetry(() => databases.listDocuments(
-          DATABASE_ID,
-          REVIEWS_COLLECTION_ID,
-          [Query.equal("targetUserId", id), Query.orderDesc("$createdAt")]
-        ))
+      const [pRes, r] = await Promise.all([
+        // Try direct getDocument first
+        withRetry(() => databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, id))
+          .catch(async (err) => {
+             console.warn("Direct getDocument failed, trying listDocuments fallback...", err);
+             // Fallback: listDocuments might have broader read permissions in some Appwrite configs
+             const fallback = await databases.listDocuments(
+               DATABASE_ID, 
+               USERS_COLLECTION_ID, 
+               [Query.equal("$id", id)]
+             );
+             if (fallback.documents.length > 0) return fallback.documents[0];
+             throw err; // Re-throw if fallback also fails
+          }),
+        REVIEWS_COLLECTION_ID 
+          ? withRetry(() => databases.listDocuments(
+              DATABASE_ID,
+              REVIEWS_COLLECTION_ID,
+              [Query.equal("targetUserId", id), Query.orderDesc("$createdAt")]
+            ))
+          : Promise.resolve({ documents: [] })
       ]);
       
+      const p = pRes as any;
       setProfile(p);
-      setReviews(r.documents);
-      setCachedData(cacheKey, { profile: p, reviews: r.documents });
+      setReviews((r as any).documents);
+      setCachedData(cacheKey, { profile: p, reviews: (r as any).documents });
     } catch (err) {
-      console.error(err);
+      console.error("Profile Fetch Error:", err);
+      // Don't set profile to null immediately if we have cached data
     } finally {
       setLoading(false);
     }

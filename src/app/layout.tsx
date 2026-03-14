@@ -16,6 +16,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Credovia | Build Your Digital Trust",
   description: "Calculate and display your credibility score based on your online presence and community reviews.",
+  icons: {
+    icon: [
+      { url: "/logo.png" },
+      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -25,6 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/logo.png" />
+      </head>
       <body className={`${inter.className} gradient-bg min-h-screen antialiased`}>
         <AuthProvider>
           <ThemeProvider>
