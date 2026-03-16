@@ -1,6 +1,3 @@
-import { databases, DATABASE_ID, USERS_COLLECTION_ID, REVIEWS_COLLECTION_ID } from "./appwrite";
-import { Query } from "appwrite";
-
 export interface Profile {
   name: string;
   bio: string;
@@ -29,12 +26,7 @@ export interface ScoreBreakdown {
   peer: number;        // 5%
 }
 
-export interface ReviewScore {
-  rating: number;
-  reviewerScore: number;
-}
-
-export function calculateCredibilityScore(profile: Profile, reviews: ReviewScore[] = []): { total: number, breakdown: ScoreBreakdown } {
+export function calculateCredibilityScore(profile: Profile, reviewCount: number = 0, averageRating: number = 0): { total: number, breakdown: ScoreBreakdown } {
   const breakdown: ScoreBreakdown = {
     crypto: 0,
     github: 0,
@@ -47,19 +39,19 @@ export function calculateCredibilityScore(profile: Profile, reviews: ReviewScore
   // 1. Crypto Wallet Analysis (Max 35 points)
   if (profile.walletAddress?.startsWith('0x')) {
     breakdown.crypto += 10; // Base presence
-
+    
     // On-chain complexity sim
-    if (profile.walletAddress.length > 30) breakdown.crypto += 15;
-
+    if (profile.walletAddress.length > 30) breakdown.crypto += 15; 
+    
     // ENS Bonus (moved from domain to crypto as it's a structural asset)
     if (profile.walletAddress.endsWith('.eth')) {
       breakdown.crypto += 10;
     }
-
+    
     if (breakdown.crypto > 35) breakdown.crypto = 35;
   }
 
-  // 2. GitHub Activity (Max 20 points)
+  // 2. GitHub Activity (Max 25 points)
   if (profile.github?.includes('github.com')) {
     breakdown.github += 5; // Base presence
 
@@ -87,13 +79,13 @@ export function calculateCredibilityScore(profile: Profile, reviews: ReviewScore
     }
 
     // Community & Contributions (Max 5 points)
-    const combinedActivity = (profile.githubFollowerCount || 0) +
-      (profile.githubContributionCount || 0) / 10 +
-      (profile.githubPRCount || 0) / 5;
+    const combinedActivity = (profile.githubFollowerCount || 0) + 
+                             (profile.githubContributionCount || 0) / 10 +
+                             (profile.githubPRCount || 0) / 5;
     if (combinedActivity >= 50) breakdown.github += 5;
     else if (combinedActivity >= 10) breakdown.github += 3;
     else if (combinedActivity > 0) breakdown.github += 1;
-
+    
     if (breakdown.github > 25) breakdown.github = 25;
   }
 
@@ -119,71 +111,20 @@ export function calculateCredibilityScore(profile: Profile, reviews: ReviewScore
   if (profile.accentColor) breakdown.behavior += 3; // Customization bonus
 
   // 6. Peer Endorsements (Max 5 points)
-  if (reviews.length > 0) {
-    let totalWeight = 0;
-    let weightedScoreSum = 0;
-
-    reviews.forEach(review => {
-      // Weight the reviewer's score from 0.1 to 1.0 based on their own credibility
-      const weight = Math.max(0.1, review.reviewerScore / 100);
-      totalWeight += weight;
-      // Rating is 1-5, normalize to 0-5 scale
-      const normalizedRating = (review.rating / 5) * 5;
-      weightedScoreSum += normalizedRating * weight;
-    });
-
-    const peerScore = totalWeight > 0 ? (weightedScoreSum / totalWeight) : 0;
-    // Add a bonus for having multiple credible endorsements
-    const volumeBonus = Math.min(totalWeight, 2); // Up to 2 bonus points based on total weight
-
-    breakdown.peer = Math.min(Math.round(peerScore + volumeBonus), 5);
+  if (reviewCount > 0) {
+    const peerScore = (averageRating / 5) * 5;
+    breakdown.peer = Math.min(Math.round(peerScore), 5);
   } else if (profile.score > 0) {
     // Default tiny trust for active profiles
     breakdown.peer = 1;
   }
 
   const total = Math.min(
-    breakdown.crypto + breakdown.github + breakdown.identity + breakdown.domain + breakdown.behavior + breakdown.peer,
+    breakdown.crypto + breakdown.github + breakdown.identity + breakdown.domain + breakdown.behavior + breakdown.peer, 
     100
   );
 
   return { total, breakdown };
-}
-
-export async function recalculateAndSyncScore(profileId: string, profileData: any, syncToDb: boolean = true) {
-  try {
-    const r = await databases.listDocuments(
-      DATABASE_ID,
-      REVIEWS_COLLECTION_ID,
-      [Query.equal("targetUserId", profileId)]
-    );
-
-    const reviewerIds = Array.from(new Set(r.documents.map(rev => rev.reviewerId)));
-    const reviewers = await Promise.all(
-      reviewerIds.map(rId => databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, rId).catch(() => null))
-    );
-
-    const reviewerScores: Record<string, number> = {};
-    reviewers.forEach(rev => { if (rev && rev.score !== undefined) reviewerScores[rev.$id] = rev.score; });
-
-    const enrichedReviews = r.documents.map(rev => ({
-      ...rev,
-      rating: rev.rating,
-      reviewerScore: reviewerScores[rev.reviewerId] || 0
-    }));
-
-    const result = calculateCredibilityScore(profileData, enrichedReviews);
-
-    if (syncToDb) {
-      // Sync only score to avoid overwriting recent changes if profileData is just partial
-      await databases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, profileId, { score: result.total });
-    }
-
-    return { ...result, enrichedReviews };
-  } catch (error) {
-    console.error("Error recalculating score:", error);
-    return { total: profileData.score || 0, breakdown: calculateCredibilityScore(profileData).breakdown, enrichedReviews: [] };
-  }
 }
 
 export function getScoreColor(score: number): string {

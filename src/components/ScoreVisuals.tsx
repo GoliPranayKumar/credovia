@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import { getScoreColor, getScoreLabel } from "@/lib/score";
 import { ShieldCheck, Zap, Award, Users, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import {
-  Radar, RadarChart, PolarGrid, PolarAngleAxis,
+import { 
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip,
   AreaChart, Area, PieChart, Pie, Cell
 } from 'recharts';
@@ -45,16 +45,16 @@ export function ScoreProgress({ score }: { score: number }) {
         <span className="text-2xl font-black">{score}<span className="text-xs text-muted-foreground ml-1">/100</span></span>
       </div>
       <div className="h-3 w-full bg-secondary rounded-full overflow-hidden border border-border">
-        <motion.div
+          <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${score}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
           className={cn(
             "h-full rounded-full shadow-[0_0_10px_rgba(37,99,235,0.1)]",
             score >= 80 ? "bg-gradient-to-r from-blue-600 to-blue-500" :
-              score >= 60 ? "bg-gradient-to-r from-blue-500 to-blue-400" :
-                score >= 40 ? "bg-gradient-to-r from-blue-400 to-blue-300" :
-                  "bg-gradient-to-r from-blue-300 to-blue-200"
+            score >= 60 ? "bg-gradient-to-r from-blue-500 to-blue-400" :
+            score >= 40 ? "bg-gradient-to-r from-blue-400 to-blue-300" :
+            "bg-gradient-to-r from-blue-300 to-blue-200"
           )}
         />
       </div>
@@ -108,15 +108,15 @@ export function ScoreBarComparison({ breakdown }: { breakdown: any }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart layout="vertical" data={data} margin={{ left: 15, right: 30 }}>
           <XAxis type="number" hide domain={[0, 'dataMax']} />
-          <YAxis
-            dataKey="name"
-            type="category"
-            tick={{ fill: '#2563eb', fontSize: 9, fontWeight: 700 }}
-            axisLine={false}
+          <YAxis 
+            dataKey="name" 
+            type="category" 
+            tick={{ fill: '#2563eb', fontSize: 9, fontWeight: 700 }} 
+            axisLine={false} 
             tickLine={false}
             width={70}
           />
-          <Tooltip
+          <Tooltip 
             cursor={{ fill: 'rgba(37,99,235,0.02)' }}
             contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(37,99,235,0.1)', borderRadius: '12px', fontSize: '10px' }}
           />
@@ -127,15 +127,14 @@ export function ScoreBarComparison({ breakdown }: { breakdown: any }) {
   );
 }
 
-export function TrustEvolutionChart({ currentScore }: { currentScore: number }) {
-  // Generate a realistic looking history leading up to the current score
+export function TrustEvolutionChart() {
   const data = [
-    { name: 'Month 1', val: Math.max(0, currentScore - 25) },
-    { name: 'Month 2', val: Math.max(0, currentScore - 18) },
-    { name: 'Month 3', val: Math.max(0, currentScore - 22) },
-    { name: 'Month 4', val: Math.max(0, currentScore - 12) },
-    { name: 'Month 5', val: Math.max(0, currentScore - 5) },
-    { name: 'Current', val: currentScore },
+    { name: 'Jan', val: 45 },
+    { name: 'Feb', val: 52 },
+    { name: 'Mar', val: 48 },
+    { name: 'Apr', val: 61 },
+    { name: 'May', val: 59 },
+    { name: 'Jun', val: 72 },
   ];
 
   return (
@@ -145,8 +144,8 @@ export function TrustEvolutionChart({ currentScore }: { currentScore: number }) 
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(37,99,235,0.1)', borderRadius: '12px', fontSize: '10px' }} />
@@ -235,7 +234,7 @@ export function ScoreGauge({ score }: { score: number }) {
   );
 }
 
-export function ScoreBreakdownView({ breakdown, currentScore }: { breakdown: any, currentScore: number }) {
+export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
   const items = [
     { label: "On-Chain", value: breakdown.crypto, max: 35, color: "#2563eb" },
     { label: "Dev Activity", value: breakdown.github, max: 25, color: "#3b82f6" },
@@ -249,7 +248,7 @@ export function ScoreBreakdownView({ breakdown, currentScore }: { breakdown: any
     <div className="space-y-8">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {items.map((item, i) => (
-          <ParameterGauge
+          <ParameterGauge 
             key={i}
             label={item.label}
             value={item.value}
@@ -270,19 +269,19 @@ export function ScoreBreakdownView({ breakdown, currentScore }: { breakdown: any
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2 bg-white p-6 rounded-[2.5rem] border border-border shadow-sm">
-          <TrustEvolutionChart currentScore={currentScore} />
+          <TrustEvolutionChart />
         </div>
         <div className="bg-blue-50 rounded-[2.5rem] border border-blue-100 p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-sm">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-inner border border-blue-100">
-            <Zap className="w-8 h-8 text-blue-600" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-xl font-black text-blue-900">AI Insight</h4>
-            <p className="text-[10px] text-blue-900/60 uppercase tracking-widest font-black">Predicted Growth</p>
-          </div>
-          <p className="text-xs text-blue-800 leading-relaxed">
-            Based on your consistency, your protocol rank is projected to increase by <strong>12%</strong> in the next 30 days.
-          </p>
+           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-inner border border-blue-100">
+              <Zap className="w-8 h-8 text-blue-600" />
+           </div>
+           <div className="space-y-1">
+              <h4 className="text-xl font-black text-blue-900">AI Insight</h4>
+              <p className="text-[10px] text-blue-900/60 uppercase tracking-widest font-black">Predicted Growth</p>
+           </div>
+           <p className="text-xs text-blue-800 leading-relaxed">
+              Based on your consistency, your protocol rank is projected to increase by <strong>12%</strong> in the next 30 days.
+           </p>
         </div>
       </div>
     </div>
