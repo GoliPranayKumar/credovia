@@ -50,51 +50,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let needsUpdate = false;
 
       if (githubId) {
-        console.log("DEBUG: Syncing GitHub data for UID:", githubId.providerUid);
+        console.log("DEBUG: Processing GitHub identity link...");
+        
+        // Ensure we at least mark it as connected even if API fails
+        if (!currentProfile.github) {
+          updateData.github = `https://github.com/appwrite-verified-user-${githubId.providerUid}`;
+          needsUpdate = true;
+        }
+
         try {
           const ghRes = await withRetry(() => fetch(`https://api.github.com/user/${githubId.providerUid}`));
-          if (!ghRes.ok) throw new Error(`GitHub API error: ${ghRes.status}`);
-          const ghData = await ghRes.json();
-          
-          if (ghData.login) {
-            const verifiedUrl = `https://github.com/${ghData.login}`;
-            console.log("DEBUG: GitHub User found:", ghData.login);
-            
-            let totalStars = 0;
-            let totalCommits = 0;
-            let totalPRs = 0;
-            
-            try {
-              const [repos, commuteData, prData] = await Promise.all([
-                fetch(`https://api.github.com/users/${ghData.login}/repos?per_page=100`).then(r => r.json()),
-                fetch(`https://api.github.com/search/commits?q=author:${ghData.login}`).then(r => r.json()),
-                fetch(`https://api.github.com/search/issues?q=author:${ghData.login}+type:pr`).then(r => r.json())
-              ]);
+          if (ghRes.ok) {
+            const ghData = await ghRes.json();
+            if (ghData.login) {
+              const verifiedUrl = `https://github.com/${ghData.login}`;
+              console.log("DEBUG: GitHub User found:", ghData.login);
               
-              if (Array.isArray(repos)) {
-                totalStars = repos.reduce((acc: number, repo: any) => acc + (repo.stargazers_count || 0), 0);
+              let totalStars = 0;
+              let totalCommits = 0;
+              let totalPRs = 0;
+              
+              try {
+                const [repos, commuteData, prData] = await Promise.all([
+                  fetch(`https://api.github.com/users/${ghData.login}/repos?per_page=100`).then(r => r.json()),
+                  fetch(`https://api.github.com/search/commits?q=author:${ghData.login}`).then(r => r.json()),
+                  fetch(`https://api.github.com/search/issues?q=author:${ghData.login}+type:pr`).then(r => r.json())
+                ]);
+                
+                if (Array.isArray(repos)) {
+                  totalStars = repos.reduce((acc: number, repo: any) => acc + (repo.stargazers_count || 0), 0);
+                }
+                totalCommits = commuteData.total_count || 0;
+                totalPRs = prData.total_count || 0;
+              } catch (err) {
+                console.warn("DEBUG: Detailed GitHub stats failed (likely rate limit):", err);
               }
-              totalCommits = commuteData.total_count || 0;
-              totalPRs = prData.total_count || 0;
-            } catch (err) {
-              console.warn("DEBUG: Detailed GitHub stats failed (likely rate limit):", err);
-            }
 
-            Object.assign(updateData, {
-              github: verifiedUrl,
-              githubRepoCount: ghData.public_repos || 0,
-              githubFollowerCount: ghData.followers || 0,
-              githubFollowingCount: ghData.following || 0,
-              githubGistCount: ghData.public_gists || 0,
-              githubContributionCount: totalCommits,
-              githubPRCount: totalPRs,
-              githubStarCount: totalStars,
-              githubCreatedAt: ghData.created_at
-            });
-            needsUpdate = true;
+              Object.assign(updateData, {
+                github: verifiedUrl,
+                githubRepoCount: ghData.public_repos || 0,
+                githubFollowerCount: ghData.followers || 0,
+                githubFollowingCount: ghData.following || 0,
+                githubGistCount: ghData.public_gists || 0,
+                githubContributionCount: totalCommits,
+                githubPRCount: totalPRs,
+                githubStarCount: totalStars,
+                githubCreatedAt: ghData.created_at
+              });
+              needsUpdate = true;
+            }
           }
         } catch (e) {
-          console.error("DEBUG: GitHub core sync failed:", e);
+          console.error("DEBUG: GitHub core sync API error:", e);
         }
       }
 
@@ -127,7 +134,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = useCallback(async (forceSync = false) => {
     try {
-      const session = await account.get();
+      // Add a tiny delay if we're coming from an OAuth redirect to ensure cookies are ready
+      const isOauthReturn = typeof window !== 'undefined' && 
+        (window.location.search.includes('sync=') || window.location.search.includes('oauth'));
+      
+      if (isOauthReturn && !forceSync) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+
+      let session;
+      try {
+        session = await account.get();
+      } catch (err: any) {
+        // One-time retry for OAuth returns
+        if (isOauthReturn && (err.code === 401 || err.code === 403)) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          session = await account.get();
+        } else {
+          throw err;
+        }
+      }
+      
       console.log("DEBUG: Active Session User:", session);
       setUser(session);
       
