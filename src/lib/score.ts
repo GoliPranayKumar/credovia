@@ -24,6 +24,8 @@ export interface Profile {
   [key: string]: any;
 }
 
+import { databases, DATABASE_ID, USERS_COLLECTION_ID } from './appwrite';
+
 export interface ScoreBreakdown {
   crypto: number;      // 15%
   github: number;      // 35%
@@ -32,6 +34,22 @@ export interface ScoreBreakdown {
   behavior: number;    // Legacy
   peer: number;        // Legacy
   leetcode: number;    // 30%
+}
+
+export async function recalculateAndSyncScore(userId: string, profile: Profile, syncToDb: boolean = true) {
+  const { total, breakdown } = calculateCredibilityScore(profile);
+  
+  if (syncToDb && total !== profile.score) {
+    try {
+      await databases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, userId, {
+        score: total
+      });
+    } catch (error) {
+      console.error("Failed to sync score to DB:", error);
+    }
+  }
+  
+  return { total, breakdown };
 }
 
 export function calculateCredibilityScore(profile: Profile, reviewCount: number = 0, averageRating: number = 0): { total: number, breakdown: ScoreBreakdown } {
