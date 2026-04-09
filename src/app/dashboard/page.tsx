@@ -16,7 +16,7 @@ import {
   Search, 
   TrendingUp, 
   Globe, 
-  Lock, 
+  Lock as LockIcon, 
   Link as LinkIcon, 
   Rocket, 
   Users2, 
@@ -38,7 +38,15 @@ import {
   Terminal,
   MousePointer2,
   Cpu,
-  Shield
+  Shield,
+  GitBranch,
+  ArrowRight,
+  UserPlus,
+  Calendar,
+  Trophy as TrophyIcon,
+  GitPullRequest,
+  Users,
+  Mail
 } from "lucide-react";
 import { InsightModals } from "@/components/dashboard/InsightModals";
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite";
