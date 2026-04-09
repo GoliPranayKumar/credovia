@@ -2,7 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { getScoreColor, getScoreLabel } from "@/lib/score";
-import { ShieldCheck, Zap, Award, Users, TrendingUp } from "lucide-react";
+import { ShieldCheck, Zap, Award, Users, TrendingUp, Globe } from "lucide-react";
+import { SiGithub, SiLeetcode, SiEthereum } from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, 
@@ -64,26 +66,25 @@ export function ScoreProgress({ score }: { score: number }) {
 
 export function ScoreRadarChart({ breakdown }: { breakdown: any }) {
   const data = [
-    { subject: 'On-Chain', A: breakdown.crypto, fullMark: 35 },
-    { subject: 'Dev Activity', A: breakdown.github, fullMark: 25 },
-    { subject: 'Identity', A: breakdown.identity, fullMark: 15 },
+    { subject: 'On-Chain', A: breakdown.crypto, fullMark: 15 },
+    { subject: 'GitHub Activity', A: breakdown.github, fullMark: 35 },
+    { subject: 'LinkedIn', A: breakdown.identity, fullMark: 10 },
+    { subject: 'LeetCode', A: breakdown.leetcode, fullMark: 30 },
     { subject: 'Domain', A: breakdown.domain, fullMark: 10 },
-    { subject: 'Behavior', A: breakdown.behavior, fullMark: 10 },
-    { subject: 'Endorsements', A: breakdown.peer, fullMark: 5 },
   ];
 
   return (
-    <div className="h-[280px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border relative overflow-hidden group">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-[280px] w-full min-w-0 bg-transparent rounded-[2.5rem] p-6 border border-white/10 relative overflow-hidden group">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-          <PolarGrid stroke="rgba(37,99,235,0.05)" />
-          <PolarAngleAxis dataKey="subject" tick={{ fill: '#2563eb', fontSize: 9, fontWeight: 700 }} />
+          <PolarGrid stroke="rgba(79,70,229,0.15)" />
+          <PolarAngleAxis dataKey="subject" tick={{ fill: '#818cf8', fontSize: 9, fontWeight: 700 }} />
           <Radar
             name="Credibility"
             dataKey="A"
-            stroke="#2563eb"
-            fill="#2563eb"
+            stroke="#6366f1"
+            fill="#4f46e5"
             fillOpacity={0.3}
           />
         </RadarChart>
@@ -94,33 +95,33 @@ export function ScoreRadarChart({ breakdown }: { breakdown: any }) {
 
 export function ScoreBarComparison({ breakdown }: { breakdown: any }) {
   const data = [
-    { name: 'On-Chain', current: breakdown.crypto, max: 35 },
-    { name: 'Dev Activity', current: breakdown.github, max: 25 },
-    { name: 'Identity', current: breakdown.identity, max: 15 },
+    { name: 'On-Chain', current: breakdown.crypto, max: 15 },
+    { name: 'GitHub', current: breakdown.github, max: 35 },
+    { name: 'LinkedIn', current: breakdown.identity, max: 10 },
+    { name: 'LeetCode', current: breakdown.leetcode, max: 30 },
     { name: 'Domain', current: breakdown.domain, max: 10 },
-    { name: 'Behavior', current: breakdown.behavior, max: 10 },
-    { name: 'Endorsements', current: breakdown.peer, max: 5 },
   ].sort((a, b) => (a.current / a.max) - (b.current / b.max)); // Sort by efficiency percentage
 
   return (
-    <div className="h-[250px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border">
-      <h5 className="text-[10px] font-black uppercase text-blue-900/60 mb-4 tracking-widest">Efficiency Ranking</h5>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-[250px] w-full min-w-0 bg-transparent rounded-[2.5rem] p-6 border border-white/10">
+      <h5 className="text-[10px] font-black uppercase text-indigo-400 mb-4 tracking-widest">Efficiency Ranking</h5>
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <BarChart layout="vertical" data={data} margin={{ left: 15, right: 30 }}>
           <XAxis type="number" hide domain={[0, 'dataMax']} />
           <YAxis 
             dataKey="name" 
             type="category" 
-            tick={{ fill: '#2563eb', fontSize: 9, fontWeight: 700 }} 
+            tick={{ fill: '#818cf8', fontSize: 9, fontWeight: 700 }} 
             axisLine={false} 
             tickLine={false}
             width={70}
           />
           <Tooltip 
-            cursor={{ fill: 'rgba(37,99,235,0.02)' }}
-            contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(37,99,235,0.1)', borderRadius: '12px', fontSize: '10px' }}
+            cursor={{ fill: 'rgba(79,70,229,0.05)' }}
+            contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(79,70,229,0.2)', borderRadius: '12px', fontSize: '10px', color: '#818cf8' }}
+            itemStyle={{ color: '#fff' }}
           />
-          <Bar dataKey="current" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={12} />
+          <Bar dataKey="current" fill="#4f46e5" radius={[0, 4, 4, 0]} barSize={12} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -138,25 +139,28 @@ export function TrustEvolutionChart() {
   ];
 
   return (
-    <div className="h-[200px] w-full bg-secondary/50 rounded-[2.5rem] p-6 border border-border">
-      <h5 className="text-[10px] font-black uppercase text-blue-900/60 mb-4 tracking-widest">Trust Index Projection</h5>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-[200px] w-full min-w-0 bg-transparent rounded-[2.5rem] p-6 border border-white/10">
+      <h5 className="text-[10px] font-black uppercase text-blue-400 mb-4 tracking-widest">Trust Index Projection</h5>
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(37,99,235,0.1)', borderRadius: '12px', fontSize: '10px' }} />
-          <Area type="monotone" dataKey="val" stroke="#2563eb" fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
+          <Tooltip 
+             contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '12px', fontSize: '10px', color: '#60a5fa' }}
+             itemStyle={{ color: '#fff' }}
+          />
+          <Area type="monotone" dataKey="val" stroke="#3b82f6" fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
   );
 }
 
-export function ParameterGauge({ label, value, max, color }: { label: string, value: number, max: number, color: string }) {
+export function ParameterGauge({ label, value, max, color, icon: Icon }: { label: string, value: number, max: number, color: string, icon: any }) {
   const percentage = (value / max) * 100;
   const data = [
     { name: 'Value', value: value },
@@ -164,9 +168,9 @@ export function ParameterGauge({ label, value, max, color }: { label: string, va
   ];
 
   return (
-    <div className="flex flex-col items-center gap-3 p-5 rounded-[2.5rem] bg-white border border-border/60 group hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/40 transition-all cursor-default">
+    <div className="flex flex-col items-center gap-3 p-5 rounded-[2.5rem] bg-neutral-900/50 border border-white/5 group hover:border-white/20 hover:shadow-lg hover:shadow-white/5 transition-all cursor-default">
       <div className="h-[75px] w-[75px] relative shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <PieChart>
             <Pie
               data={data}
@@ -180,19 +184,20 @@ export function ParameterGauge({ label, value, max, color }: { label: string, va
               endAngle={-270}
             >
               <Cell fill={color} stroke="none" />
-              <Cell fill="rgba(37,99,235,0.03)" stroke="none" />
+              <Cell fill="rgba(255,255,255,0.05)" stroke="none" />
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-        <div className="absolute inset-0 flex items-center justify-center font-black text-xs text-foreground">
-          {Math.round(percentage)}%
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <Icon className="w-3.5 h-3.5 mb-0.5 opacity-90" style={{ color }} />
+          <span className="font-black text-[10px] text-white leading-none">{Math.round(percentage)}%</span>
         </div>
       </div>
       <div className="text-center space-y-0.5">
-        <p className="text-[10px] font-black text-blue-900/60 uppercase tracking-widest transition-colors group-hover:text-primary">
+        <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest transition-colors group-hover:text-white">
           {label}
         </p>
-        <p className="text-[9px] font-mono text-muted-foreground opacity-50">
+        <p className="text-[9px] font-mono text-neutral-500">
           {value}/{max} pts
         </p>
       </div>
@@ -207,8 +212,8 @@ export function ScoreGauge({ score }: { score: number }) {
   ];
 
   return (
-    <div className="h-[180px] w-[180px] relative">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-[180px] w-[180px] relative min-w-0 min-h-0">
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <PieChart>
           <Pie
             data={data}
@@ -236,17 +241,16 @@ export function ScoreGauge({ score }: { score: number }) {
 
 export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
   const items = [
-    { label: "On-Chain", value: breakdown.crypto, max: 35, color: "#2563eb" },
-    { label: "Dev Activity", value: breakdown.github, max: 25, color: "#3b82f6" },
-    { label: "Identity", value: breakdown.identity, max: 15, color: "#93c5fd" },
-    { label: "Domain", value: breakdown.domain, max: 10, color: "#2563eb" },
-    { label: "Behavior", value: breakdown.behavior, max: 10, color: "#3b82f6" },
-    { label: "Endorsements", value: breakdown.peer, max: 5, color: "#93c5fd" },
+    { label: "On-Chain", value: breakdown.crypto, max: 15, color: "#8b5cf6", icon: SiEthereum },
+    { label: "GitHub", value: breakdown.github, max: 35, color: "#3b82f6", icon: SiGithub },
+    { label: "LinkedIn", value: breakdown.identity, max: 10, color: "#06b6d4", icon: FaLinkedin },
+    { label: "LeetCode", value: breakdown.leetcode, max: 30, color: "#f59e0b", icon: SiLeetcode },
+    { label: "Domain", value: breakdown.domain, max: 10, color: "#10b981", icon: Globe },
   ];
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {items.map((item, i) => (
           <ParameterGauge 
             key={i}
@@ -254,36 +258,38 @@ export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
             value={item.value}
             max={item.max}
             color={item.color}
+            icon={item.icon}
           />
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-[2.5rem] border border-border shadow-sm">
+        <div className="bg-transparent p-4 rounded-[2.5rem] border border-white/10 shadow-sm">
           <ScoreRadarChart breakdown={breakdown} />
         </div>
-        <div className="bg-white p-4 rounded-[2.5rem] border border-border shadow-sm">
+        <div className="bg-transparent p-4 rounded-[2.5rem] border border-white/10 shadow-sm">
           <ScoreBarComparison breakdown={breakdown} />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 bg-white p-6 rounded-[2.5rem] border border-border shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <div className="md:col-span-2 bg-transparent p-6 rounded-[2.5rem] border border-white/10 shadow-sm">
           <TrustEvolutionChart />
         </div>
-        <div className="bg-blue-50 rounded-[2.5rem] border border-blue-100 p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-sm">
-           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-inner border border-blue-100">
-              <Zap className="w-8 h-8 text-blue-600" />
+        <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/20 rounded-[2.5rem] border border-indigo-500/20 p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-sm group">
+           <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center shadow-inner border border-blue-500/20 group-hover:border-blue-400/40 transition-colors">
+              <Zap className="w-8 h-8 text-blue-400" />
            </div>
            <div className="space-y-1">
-              <h4 className="text-xl font-black text-blue-900">AI Insight</h4>
-              <p className="text-[10px] text-blue-900/60 uppercase tracking-widest font-black">Predicted Growth</p>
+              <h4 className="text-xl font-black text-indigo-50">AI Insight</h4>
+              <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-black">Predicted Growth</p>
            </div>
-           <p className="text-xs text-blue-800 leading-relaxed">
-              Based on your consistency, your protocol rank is projected to increase by <strong>12%</strong> in the next 30 days.
+           <p className="text-xs text-indigo-200/80 leading-relaxed">
+              Based on your consistency, your protocol rank is projected to increase by <strong className="text-cyan-400">12%</strong> in the next 30 days.
            </p>
         </div>
       </div>
+
     </div>
   );
 }

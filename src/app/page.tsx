@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { ShieldCheck, Github, Linkedin, Globe, Search, Trophy } from "lucide-react";
+import { SiEthereum, SiGithub, SiLeetcode } from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { HeroSequence } from "@/components/HeroSequence";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +21,7 @@ export default function Home() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-sm font-bold opacity-0 shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-foreground text-sm font-bold opacity-0 shadow-sm"
           >
             <Trophy className="w-4 h-4" />
             <span>The Gold Standard for Digital Reputation</span>
@@ -32,7 +34,7 @@ export default function Home() {
             className="text-5xl md:text-7xl font-black tracking-tight leading-[1.1]"
           >
             Your Reputation in <br />
-            <span className="drop-shadow-[0_2px_4px_rgba(139,92,246,0.15)]">
+            <span>
               <span>A Single </span>
               <span className="text-primary">Number.</span>
             </span>
@@ -56,15 +58,15 @@ export default function Home() {
           >
             <Link 
               href="/login" 
-              className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-violet-500/15 hover:shadow-violet-500/25 transition-all hover:-translate-y-1 active:scale-95 text-lg"
+              className="w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl shadow-xl shadow-white/10 hover:shadow-white/20 transition-all hover:-translate-y-1 active:scale-95 text-lg"
             >
               Create Your Profile
             </Link>
             <Link 
               href="/search" 
-              className="w-full sm:w-auto px-8 py-4 bg-secondary border border-border text-foreground font-bold rounded-2xl hover:bg-violet-50 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 text-lg shadow-sm"
+              className="w-full sm:w-auto px-8 py-4 bg-secondary border border-border text-foreground font-bold rounded-2xl hover:bg-muted transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 text-lg shadow-sm"
             >
-              <Search className="w-5 h-5 text-violet-600" />
+              <Search className="w-5 h-5 text-foreground" />
               Find Users
             </Link>
           </motion.div>
@@ -80,42 +82,43 @@ export default function Home() {
           <HeroSequence />
           
           {/* Decorative background blob for image */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-violet-400/20 to-fuchsia-400/20 blur-3xl -z-10 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/5 blur-3xl -z-10 rounded-full" />
         </motion.div>
 
-        {/* Floating Icons background effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-20 w-full max-w-4xl opacity-10 blur-3xl pointer-events-none text-violet-300">
-          <div className="absolute top-0 left-1/4 w-72 h-72 bg-violet-200 rounded-full" />
-          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-fuchsia-100 rounded-full" />
+        {/* Floating background blobs */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-20 w-full max-w-4xl opacity-5 blur-3xl pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-white rounded-full" />
+          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-white rounded-full" />
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {[
           {
-            title: "35% Crypto Analysis",
-            desc: "On-chain verification of wallet age, transaction frequency, and token diversity via Alchemy.",
-            logo: "/logo.png",
-            color: "text-violet-600",
-            bg: "bg-white",
-            borderColor: "border-violet-100"
+            title: "15% Web3 Activity",
+            desc: "On-chain verification of wallet maturity and network transactions.",
+            icon: SiEthereum,
           },
           {
-            title: "25% GitHub Presence",
-            desc: "Quantitative analysis of repositories, contributions, and account established history.",
-            icon: Github,
-            color: "text-violet-700",
-            bg: "bg-violet-50",
-            borderColor: "border-violet-100"
+            title: "35% GitHub",
+            desc: "Quantitative analysis of open-source repositories and contribution regularity.",
+            icon: SiGithub,
           },
           {
-            title: "Multi-Layer Identity",
-            desc: "Weighted scoring including Google Verification (10%), ENS Ownership (10%), and Peer Endorsements.",
-            icon: Trophy,
-            color: "text-violet-600",
-            bg: "bg-violet-50",
-            borderColor: "border-violet-100"
+            title: "10% LinkedIn",
+            desc: "Verification of your professional network identity and career standing.",
+            icon: FaLinkedin,
+          },
+          {
+            title: "30% LeetCode",
+            desc: "Validation of algorithmic proficiency and problem-solving benchmarks.",
+            icon: SiLeetcode,
+          },
+          {
+             title: "10% Enterprise",
+             desc: "Official authority verified via your institutional email domain ownership.",
+             icon: Globe,
           }
         ].map((f, i) => (
           <motion.div 
@@ -124,31 +127,76 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="p-8 rounded-3xl glass hover:border-violet-200 transition-colors space-y-4 shadow-sm group"
+            className="p-6 md:p-8 rounded-3xl glass hover:border-white/20 transition-colors space-y-4 shadow-sm group border border-border"
           >
-            <div className={`w-14 h-14 ${f.bg} rounded-xl flex items-center justify-center ${f.color} border ${f.borderColor} shadow-inner group-hover:scale-110 transition-transform`}>
-              {f.logo ? (
-                <img src={f.logo} alt="feature icon" className="w-11 h-11 object-contain" />
-              ) : f.icon ? (
-                <f.icon className="w-7 h-7" />
-              ) : null}
+            <div className={`w-12 h-12 md:w-14 md:h-14 bg-secondary rounded-xl flex items-center justify-center text-foreground border border-border shadow-inner group-hover:scale-110 transition-transform`}>
+               <f.icon className="w-6 h-6 md:w-7 md:h-7 opacity-80 group-hover:opacity-100 transition-opacity" />
             </div>
-            <h3 className="text-xl font-bold">{f.title}</h3>
-            <p className="text-muted-foreground leading-relaxed">{f.desc}</p>
+            <h3 className="text-lg md:text-xl font-bold tracking-tight">{f.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
           </motion.div>
         ))}
       </section>
 
+      {/* Engine Documentation Section */}
+      <section className="pt-12 pb-8">
+         <div className="bg-[#0a0a0a] rounded-[2.5rem] border border-white/5 p-8 md:p-12 shadow-2xl relative overflow-hidden group">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />
+
+            <div className="relative z-10">
+               <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4 flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-lg font-mono shadow-inner">ƒ</span>
+                  Engine Calculations
+               </h2>
+               <p className="text-muted-foreground max-w-2xl text-lg mb-12">
+                  Complete algorithmic transparency. Here is exactly how your raw platform parameters math out to your final 0-100 credibility ranking.
+               </p>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 text-sm font-mono text-neutral-400">
+                  <div className="space-y-3 p-5 rounded-3xl bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-colors">
+                     <strong className="block text-blue-400 text-base">GitHub (35%)</strong>
+                     <p className="leading-relaxed">Base presence (+7), max combined weighted score of Repositories (+7), Stars (+7), Longevity (+7), and Commit Activity (+7) bound exactly to 35 pts.</p>
+                  </div>
+                  <div className="space-y-3 p-5 rounded-3xl bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-colors">
+                     <strong className="block text-amber-500 text-base">LeetCode (30%)</strong>
+                     <p className="leading-relaxed">Hard (x5) + Medium (x2.5) + Easy (x1) mapped against dynamic global competition benchmarks, scaled up mathematically: Math.min(Score/100 × 30).</p>
+                  </div>
+                  <div className="space-y-3 p-5 rounded-3xl bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-colors">
+                     <strong className="block text-violet-500 text-base">Web3 (15%)</strong>
+                     <p className="leading-relaxed">Standard wallet instantiation (+5), accompanied strictly by heavy on-chain transaction scaling (+5) and protocol-level ENS resolution validations (+5).</p>
+                  </div>
+                  <div className="space-y-3 p-5 rounded-3xl bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-colors">
+                     <strong className="block text-cyan-500 text-base">LinkedIn (10%)</strong>
+                     <p className="leading-relaxed">OAuth boolean handshake mapping against valid corporate career networks (+7), supplemented structurally via Email KYC validation (+3).</p>
+                  </div>
+                  <div className="space-y-3 p-5 rounded-3xl bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-colors">
+                     <strong className="block text-emerald-500 text-base">Domain (10%)</strong>
+                     <p className="leading-relaxed">Enterprise/institutional email ownership proofs statically asserted across registered, non-public global TLDs (+10 max scaling).</p>
+                  </div>
+               </div>
+               
+               <div className="mt-8 pt-8 border-t border-white/10 text-xs md:text-sm text-neutral-500 font-mono flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <span className="bg-secondary px-4 py-2 rounded-lg border border-border">Core Logic: min(∑ Weighted Integrations, 100)</span>
+                  <span className="uppercase tracking-[0.2em] font-black text-[10px]">v2.1.0 Algorithm Protocol</span>
+               </div>
+            </div>
+         </div>
+      </section>
+
       {/* Trust Logos */}
       <section className="text-center py-20 border-y border-border/50 space-y-12">
-        <h2 className="text-muted-foreground font-semibold uppercase tracking-[0.2em] text-sm">Integrates with your favorite platforms</h2>
-        <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+        <h2 className="text-muted-foreground font-semibold uppercase tracking-[0.2em] text-sm">Integrates with your fundamental platforms</h2>
+        <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+           <div className="flex items-center gap-3 cursor-pointer"><SiEthereum className="w-8 h-8"/> <span className="text-2xl font-bold">Ethereum</span></div>
            <button onClick={loginWithGithub} className="flex items-center gap-3 hover:text-primary transition-colors cursor-pointer outline-none">
-              <Github className="w-8 h-8"/> 
+              <SiGithub className="w-8 h-8"/> 
               <span className="text-2xl font-bold">GitHub</span>
            </button>
-           <div className="flex items-center gap-3"><Linkedin className="w-8 h-8"/> <span className="text-2xl font-bold">LinkedIn</span></div>
-           <div className="flex items-center gap-3"><Globe className="w-8 h-8"/> <span className="text-2xl font-bold">Websites</span></div>
+           <div className="flex items-center gap-3"><FaLinkedin className="w-8 h-8"/> <span className="text-2xl font-bold">LinkedIn</span></div>
+           <div className="flex items-center gap-3"><SiLeetcode className="w-8 h-8"/> <span className="text-2xl font-bold">LeetCode</span></div>
+           <div className="flex items-center gap-3"><Globe className="w-8 h-8"/> <span className="text-2xl font-bold">Domains</span></div>
         </div>
       </section>
 

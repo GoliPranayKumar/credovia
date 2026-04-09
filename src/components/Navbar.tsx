@@ -59,7 +59,6 @@ export default function Navbar() {
   }, [pathname]);
 
   const navItems = [
-    { name: "Search", href: "/search", icon: Search },
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, protected: true },
   ];
@@ -113,21 +112,6 @@ export default function Navbar() {
         {/* Right: Actions & Profile */}
         <div className="flex items-center gap-2 md:gap-3">
           <div className="flex items-center gap-2 bg-secondary/30 p-1 rounded-2xl border border-border/40">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="relative w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-card flex items-center justify-center transition-all active:scale-90 overflow-hidden group shadow-none hover:shadow-sm"
-              aria-label="Toggle theme"
-            >
-              <Sun className={cn(
-                "w-4 h-4 text-amber-500 absolute transition-all duration-300 group-hover:rotate-12",
-                theme === "dark" ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
-              )} />
-              <Moon className={cn(
-                "w-4 h-4 text-violet-400 absolute transition-all duration-300 group-hover:-rotate-12",
-                theme === "dark" ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
-              )} />
-            </button>
 
             {/* Notifications */}
             {user && (
@@ -148,7 +132,7 @@ export default function Navbar() {
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-1 hidden lg:block">
                   {user.name?.split(' ')[0]}
                 </span>
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-[10px] md:text-[12px] font-black text-white border-2 border-white shadow-sm transition-transform group-hover:scale-105">
+                <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-white to-neutral-400 flex items-center justify-center text-[10px] md:text-[12px] font-black text-black border-2 border-white shadow-sm transition-transform group-hover:scale-105">
                   {(profile?.name || user.name || "U")[0]}
                 </div>
                 <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform hidden sm:block", showDropdown && "rotate-180")} />
@@ -282,7 +266,7 @@ export default function Navbar() {
               <div className="p-8 border-t border-border/50 bg-secondary/20">
                  {user ? (
                    <div className="flex items-center gap-4 p-4 rounded-3xl bg-white dark:bg-card border border-border/50">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center font-black text-white shadow-lg">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-neutral-400 flex items-center justify-center font-black text-black shadow-lg">
                         {user.name[0]}
                       </div>
                       <div className="flex-1 min-w-0">

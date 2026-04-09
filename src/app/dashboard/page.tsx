@@ -14,6 +14,7 @@ import {
   Loader2,
   LogOut,
   ShieldCheck,
+  Lock as LockIcon,
   Download,
   Award,
   RefreshCw,
@@ -38,11 +39,16 @@ import {
   Rocket,
   Search,
   Layers,
-  GitPullRequest
+  GitPullRequest,
+  Code2,
+  Trophy as TrophyIcon,
+  BarChart3,
+  Lightbulb
 } from "lucide-react";
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite";
 import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
 import { analyzeWallet } from "@/lib/alchemy";
+import { getLeetCodeRank, type LeetCodeScore } from "@/lib/leetcode";
 import { motion, AnimatePresence } from "framer-motion";
 import { CertificateTemplate } from "@/components/CertificateTemplate";
 import { ShareScoreCard } from "@/components/ShareScoreCard";
@@ -53,6 +59,8 @@ import { ProfileCustomizer, getAccentGradient } from "@/components/ProfileCustom
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { getScoreLabel } from "@/lib/score";
+import { SiEthereum, SiGithub, SiLeetcode } from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa";
 
 import { withRetry } from "@/lib/app-utils";
 
@@ -79,6 +87,10 @@ function DashboardContent() {
   const [showDomainInsights, setShowDomainInsights] = useState(false);
   const [domainData, setDomainData] = useState<any>(null);
   const [loadingDomain, setLoadingDomain] = useState(false);
+  const [showLeetcodeInsights, setShowLeetcodeInsights] = useState(false);
+  const [leetcodeData, setLeetcodeData] = useState<LeetCodeScore | null>(null);
+  const [loadingLeetcode, setLoadingLeetcode] = useState(false);
+  const [leetcodeError, setLeetcodeError] = useState<string | null>(null);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [syncPlatform, setSyncPlatform] = useState<null | string>(null);
   const [syncInputValue, setSyncInputValue] = useState("");
@@ -86,6 +98,8 @@ function DashboardContent() {
   const [syncStep, setSyncStep] = useState<"input" | "otp">("input");
   const [syncUserId, setSyncUserId] = useState("");
   const [isSubmittingSync, setIsSubmittingSync] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleSync = async (platform: string) => {
     if (platform === "GitHub SSO") {
@@ -99,6 +113,15 @@ function DashboardContent() {
        // Small delay to show state before redirect
        setTimeout(() => loginWithLinkedin(), 500);
        return;
+    }
+
+    if (platform === "LeetCode") {
+      setSyncPlatform("LeetCode");
+      setSyncInputValue("");
+      setSyncOtpValue("");
+      setSyncStep("input");
+      setShowSyncModal(true);
+      return;
     }
     
     // For others, show our custom in-app modal instead of browser prompt
@@ -160,6 +183,28 @@ function DashboardContent() {
         const domain = syncInputValue.split("@")[1];
         updateData.portfolio = `https://${domain}`;
         updateData.domainVerified = true;
+      } else if (syncPlatform === "LeetCode") {
+        const lc = syncInputValue.trim().toLowerCase();
+        if (!lc) {
+          alert("Please enter your LeetCode username.");
+          setIsSubmittingSync(false);
+          return;
+        }
+        // Validate existence by calling our API
+        const res = await fetch(`/api/leetcode-score/${encodeURIComponent(lc)}`);
+        const lcData = await res.json();
+        if (!res.ok) {
+          alert(lcData.error || "LeetCode user not found.");
+          setIsSubmittingSync(false);
+          return;
+        }
+        updateData.leetcodeUsername  = lc;
+        updateData.leetcodeEasy      = lcData.easy;
+        updateData.leetcodeMedium    = lcData.medium;
+        updateData.leetcodeHard      = lcData.hard;
+        updateData.leetcodeScore     = lcData.finalScore;
+        updateData.leetcodeFetchedAt = new Date().toISOString();
+        setLeetcodeData(lcData);
       }
 
       const { total: newScore } = calculateCredibilityScore({...profile, ...updateData});
@@ -256,6 +301,42 @@ function DashboardContent() {
     }
   };
 
+  const handleOpenLeetcodeInsights = async () => {
+    setShowLeetcodeInsights(true);
+    setLeetcodeError(null);
+    const username = profile.leetcodeUsername;
+    if (!username) return;
+    if (leetcodeData && leetcodeData.username === username) return; // already loaded
+    setLoadingLeetcode(true);
+    try {
+      const res = await fetch(`/api/leetcode-score/${encodeURIComponent(username)}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setLeetcodeError(data.error || "Failed to load LeetCode data.");
+        return;
+      }
+      setLeetcodeData(data as any);
+
+      // Persist to Appwrite so the credibility score updates
+      const updateData: any = {
+        leetcodeEasy:      data.easy,
+        leetcodeMedium:    data.medium,
+        leetcodeHard:      data.hard,
+        leetcodeScore:     data.finalScore,
+        leetcodeFetchedAt: new Date().toISOString(),
+      };
+      const { total: newScore } = calculateCredibilityScore({ ...profile, ...updateData });
+      updateData.score = newScore;
+      await databases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, profile.$id, updateData);
+      await refresh();
+    } catch (err: any) {
+      setLeetcodeError(err?.message || "Network error fetching LeetCode data.");
+    } finally {
+      setLoadingLeetcode(false);
+    }
+  };
+
+
   useEffect(() => {
     if (searchParams.get("edit") === "true") {
       setIsEditing(true);
@@ -324,7 +405,7 @@ function DashboardContent() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#faf8ff",
+        backgroundColor: "#000000",
       });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("l", "px", [800, 600]);
@@ -344,7 +425,7 @@ function DashboardContent() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: null,
+        backgroundColor: "#000000",
       });
       const link = document.createElement("a");
       link.download = `Credovia_ScoreCard_${profile.name.replace(/\s+/g, '_')}.png`;
@@ -437,6 +518,7 @@ function DashboardContent() {
           score={profile.score} 
           date={new Date().toLocaleDateString()} 
           certificateId={`CR-${profile.$id.slice(0, 8).toUpperCase()}`}
+          breakdown={calculateCredibilityScore(profile).breakdown}
         />
         <ShareScoreCard
           name={profile.name}
@@ -466,52 +548,49 @@ function DashboardContent() {
            </div>
            
            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
-             <button
-               onClick={async () => {
-                 setSyncing("global");
-                 await refresh();
-                 setSyncing(null);
-               }}
-               disabled={syncing === "global"}
-               className="flex items-center gap-2 px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all disabled:opacity-50"
-             >
-               {syncing === "global" ? <Loader2 className="w-3 h-3 animate-spin"/> : <RefreshCw className="w-3 h-3" />}
-               Sync Protocol Data
-             </button>
+             {/* Removed Sync Protocol Data button per user request */}
            </div>
-        </div>        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+        </div>        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
             {[
               { 
                 name: "Alchemy / Web3", 
-                desc: "35% Weightage", 
-                icon: LinkIcon, 
-                color: "text-blue-700", 
+                desc: "15% Weightage", 
+                icon: SiEthereum, 
+                color: "text-violet-500", 
                 val: profile.walletAddress,
                 isClickable: true
               },
               { 
                 name: "GitHub SSO", 
-                desc: "25% Weightage", 
-                icon: Github, 
-                color: "text-blue-800", 
+                desc: "35% Weightage", 
+                icon: SiGithub, 
+                color: "text-blue-500", 
                 val: profile.github,
                 isClickable: true
               },
               { 
                 name: "LinkedIn", 
-                desc: "15% Weightage", 
-                icon: Linkedin, 
-                color: "text-blue-700", 
+                desc: "10% Weightage", 
+                icon: FaLinkedin, 
+                color: "text-cyan-500", 
                 val: profile.linkedin,
                 isClickable: true
               },
               { 
                 name: "Official Domain", 
-                desc: "Verify via work email", 
+                desc: "10% Weightage", 
                 icon: Globe, 
-                color: "text-blue-700", 
+                color: "text-emerald-500", 
                 val: profile.domainVerified ? profile.portfolio : null,
                 isClickable: !!profile.domainVerified
+              },
+              {
+                name: "LeetCode",
+                desc: "30% Weightage",
+                icon: SiLeetcode,
+                color: "text-amber-500",
+                val: profile.leetcodeUsername || null,
+                isClickable: !!profile.leetcodeUsername
               }
             ].map((platform, i) => (
                <div 
@@ -522,6 +601,7 @@ function DashboardContent() {
                   if (platform.name === "Alchemy / Web3") handleOpenAlchemyInsights();
                   if (platform.name === "LinkedIn") handleOpenLinkedinInsights();
                   if (platform.name === "Official Domain") handleOpenDomainInsights();
+                  if (platform.name === "LeetCode") handleOpenLeetcodeInsights();
                 }}
                 className={`p-5 rounded-[2rem] bg-white border border-border space-y-4 hover:bg-blue-50 transition-all group shadow-sm flex flex-col justify-between ${platform.isClickable && platform.val ? "md:scale-105 border-primary/30 ring-4 ring-primary/5 z-20 cursor-pointer" : ""}`}
                >
@@ -572,7 +652,7 @@ function DashboardContent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Identity & Reputation Card (Left / 4 cols) */}
-        <aside className="lg:col-span-4 space-y-6">
+        <aside className="lg:col-span-4 space-y-6 sticky top-6">
           <section className="p-6 md:p-8 rounded-[2.5rem] glass border-border bg-white space-y-6 flex flex-col items-center text-center shadow-sm">
             <div className="space-y-1">
               <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-600/60">Live Reputation</h3>
@@ -581,7 +661,6 @@ function DashboardContent() {
             
             <div className="relative">
               <ScoreGauge score={profile.score} />
-              {/* Accent-coloured user avatar behind gauge */}
               <div
                 className="w-12 h-12 rounded-2xl absolute -top-3 -right-3 flex items-center justify-center text-lg font-black text-white shadow-lg border-2 border-white dark:border-gray-800"
                 style={{ background: getAccentGradient(profile.accentColor) }}
@@ -596,100 +675,111 @@ function DashboardContent() {
 
             <div className="w-full space-y-4">
               <ScoreProgress score={profile.score} />
-              <div className="p-3 rounded-xl bg-blue-50/30 border border-blue-100 italic text-[10px] text-muted-foreground leading-relaxed">
+              <div className="p-4 rounded-xl bg-[#0a0a0a] border border-white/5 italic text-[10px] text-neutral-400 leading-relaxed shadow-inner">
                  "{getScoreDescription(profile.score)}"
               </div>
             </div>
 
-            <div className="w-full pt-4 border-t border-border space-y-3 text-left">
-              <h4 className="text-[9px] font-black uppercase tracking-widest text-blue-600/40 px-2">Verified Connections</h4>
+            <div className="w-full pt-4 border-t border-white/10 space-y-3 text-left">
+              <h4 className="text-[9px] font-black uppercase tracking-widest text-[#4f46e5] px-2 mb-4">Verified Connections</h4>
               <div className="grid grid-cols-1 gap-2">
                 {[
-                  { label: "GitHub", val: profile.github, icon: Github, color: "text-blue-800" },
-                  { label: "LinkedIn", val: profile.linkedin, icon: Linkedin, color: "text-blue-700" },
-                  { label: "Web3", val: profile.walletAddress, icon: ShieldCheck, color: "text-blue-800" },
+                  { label: "On-Chain", val: profile.walletAddress, icon: SiEthereum, color: "#8b5cf6" },
+                  { label: "GitHub", val: profile.github, icon: SiGithub, color: "#3b82f6" },
+                  { label: "LinkedIn", val: profile.linkedin, icon: FaLinkedin, color: "#06b6d4" },
+                  { label: "LeetCode", val: profile.leetcodeUsername, icon: SiLeetcode, color: "#f59e0b" },
+                  { label: "Enterprise", val: profile.domainVerified ? profile.portfolio : null, icon: Globe, color: "#10b981" },
                 ].map((link, i) => (
-                  <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/20 border border-border group hover:bg-blue-50 transition-all">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/40 border border-white/5 group hover:border-white/20 transition-all shadow-sm">
                     <div className="flex items-center gap-3">
-                      <link.icon className={`w-3.5 h-3.5 ${link.color}`} />
-                      <span className="text-[11px] font-bold text-foreground">{link.label}</span>
+                      <link.icon className="w-4 h-4 opacity-80" style={{ color: link.color }} />
+                      <span className="text-xs font-bold text-neutral-200">{link.label}</span>
                     </div>
                     {link.val ? (
-                      <a href={link.val} target="_blank" rel="noreferrer" className="p-1 px-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all border border-emerald-500/20">
-                        <ExternalLink className="w-3 h-3" />
+                      <a href={link.val} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-[#0a0a0a] text-neutral-400 hover:text-white transition-all border border-white/5 hover:border-white/20">
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     ) : (
-                      <span className="text-[9px] text-blue-200 font-bold uppercase">Null</span>
+                      <span className="text-[9px] text-neutral-600 font-bold uppercase mr-1">TBD</span>
                     )}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Compact Download Card in Sidebar */}
-            <div className="w-full pt-4 mt-2 space-y-3">
+            <div className="w-full pt-6 mt-2 space-y-3">
               <button 
                 onClick={downloadCertificate}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-primary text-white font-black rounded-2xl shadow-sm hover:translate-y-1 active:scale-95 transition-all group relative overflow-hidden border border-primary/20"
+                className="w-full flex items-center justify-center gap-3 py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all group relative overflow-hidden border border-indigo-500 hover:bg-indigo-500"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <Award className="w-4 h-4 group-hover:rotate-12 transition-transform" /> 
-                <span className="text-xs uppercase tracking-widest">Download Certificate</span>
-                <Download className="w-4 h-4" />
+                <Award className="w-4 h-4" /> 
+                <span className="text-xs uppercase tracking-widest">Download Protocol</span>
+                <Download className="w-4 h-4 opacity-50" />
               </button>
               <button 
-                onClick={downloadScoreCard}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-rose-500 via-pink-500 to-violet-500 text-white font-black rounded-2xl shadow-sm hover:-translate-y-0.5 active:scale-95 transition-all group relative overflow-hidden border border-rose-500/20"
+                onClick={() => setShowShareModal(true)}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-indigo-600/90 text-white font-black rounded-2xl shadow-lg shadow-indigo-500/20 hover:-translate-y-0.5 active:scale-95 transition-all group border border-indigo-400/30"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <Share2 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                <span className="text-xs uppercase tracking-widest">Share Score Card</span>
-                <Download className="w-4 h-4" />
+                <Share2 className="w-4 h-4 group-hover:rotate-12 transition-all text-indigo-200" />
+                <span className="text-xs uppercase tracking-widest">Share Reputation</span>
+                <ExternalLink className="w-4 h-4 opacity-50 text-indigo-200" />
               </button>
-              <p className="text-[8px] text-muted-foreground mt-3 font-bold uppercase tracking-widest opacity-40">
-                Verifiable Protocol Artifact
-              </p>
-              {/* QR Code */}
-              <div className="pt-1 flex justify-center">
+              <div className="pt-2 flex justify-center">
                 <ProfileQRCode profileId={profile.$id} name={profile.name} />
               </div>
             </div>
+          </section>
 
-            {/* Space Filler: Protocol Rank & Health */}
-            <div className="w-full mt-4 p-6 rounded-[2rem] bg-gradient-to-br from-blue-50 to-transparent border border-blue-100 space-y-5">
-               <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          {/* New: Protocol Telemetry Card to fill space */}
+          <section className="p-6 rounded-[2rem] bg-indigo-900/5 border border-indigo-200/20 space-y-4">
+             <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-900/40">Secure Node Active</span>
+                </div>
+                <LockIcon className="w-3 h-3 text-indigo-400 opacity-50" />
+             </div>
+             
+             <div className="space-y-2">
+                {[
+                  { label: "Data Integrity", val: "100%", icon: ShieldCheck },
+                  { label: "Sync Latency", val: "0.2ms", icon: Activity },
+                  { label: "Privacy Layer", val: "ZKP Enabled", icon: Zap }
+                ].map((stat, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                        <stat.icon className="w-3 h-3 text-indigo-400" />
+                        <span className="text-[8px] font-bold text-slate-500 uppercase">{stat.label}</span>
+                     </div>
+                     <span className="text-[9px] font-black text-indigo-700">{stat.val}</span>
                   </div>
-                  <div className="space-y-0.5">
-                     <h4 className="text-[10px] font-black uppercase tracking-widest text-foreground">Trust Health</h4>
-                     <p className="text-[8px] text-emerald-600 font-black uppercase">Optimized & Secure</p>
-                  </div>
-               </div>
+                ))}
+             </div>
 
-               <div className="space-y-3">
-                  {[
-                    { label: "Global Percentile", val: "Top 8.2%", icon: Users },
-                    { label: "Protocol Rank", val: "Alpha Elite", icon: Award },
-                    { label: "Growth Vector", val: "+14.2%", icon: TrendingUp },
-                  ].map((stat, i) => (
-                    <div key={i} className="flex items-center justify-between group">
-                       <div className="flex items-center gap-2">
-                          <stat.icon className="w-3 h-3 text-blue-400 group-hover:text-blue-700 transition-colors" />
-                          <span className="text-[9px] font-bold text-blue-800/60 uppercase tracking-tighter">{stat.label}</span>
-                       </div>
-                       <span className="text-[10px] font-black text-foreground">{stat.val}</span>
-                    </div>
-                  ))}
-               </div>
+             <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-[8px] font-black text-indigo-900/40 uppercase tracking-widest">
+                   <span>Shard Health</span>
+                   <span>98.4%</span>
+                </div>
+                <div className="h-1.5 w-full bg-indigo-100 rounded-full overflow-hidden">
+                   <div className="h-full w-[98.4%] bg-indigo-500 rounded-full" />
+                </div>
+             </div>
 
-               <div className="pt-4 border-t border-blue-100">
-                  <div className="h-1.5 w-full bg-blue-100 rounded-full overflow-hidden border border-blue-200">
-                     <div className="h-full w-full bg-gradient-to-r from-emerald-500 to-blue-500" />
-                  </div>
-                  <p className="text-[7px] text-center mt-2 text-muted-foreground uppercase font-black tracking-[0.3em]">Institutional Verification Ready</p>
-               </div>
-            </div>
+             <div className="pt-3 border-t border-indigo-100 flex items-center justify-center">
+                <p className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Post-Quantum Encryption Active</p>
+             </div>
+          </section>
+
+          <section className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-200/20 space-y-3">
+             <div className="flex items-center gap-2">
+                <TrophyIcon className="w-3.5 h-3.5 text-amber-500" />
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-900/40">Next Milestone</span>
+             </div>
+             <p className="text-[10px] text-slate-600 font-bold italic">Reach 85+ score to unlock "Sovereign Tier" certificate.</p>
+             <div className="h-1 w-full bg-amber-100 rounded-full overflow-hidden">
+                <div className="h-full w-[65%] bg-amber-500 rounded-full" />
+             </div>
           </section>
         </aside>
 
@@ -829,16 +919,40 @@ function DashboardContent() {
               </motion.section>
             )}
           </AnimatePresence>
+
+          {/* Trust Health Horizontal Stats */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { label: "Global Percentile", val: "Top 8.2%", desc: "REGIONAL CONTEXT", icon: Users, color: "text-blue-400", border: "border-blue-500/20", bg: "bg-blue-500/5", glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]" },
+              { label: "Protocol Rank", val: "Alpha Elite", desc: "TIER INDEX", icon: Award, color: "text-indigo-400", border: "border-indigo-500/20", bg: "bg-indigo-500/5", glow: "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.1)]" },
+              { label: "Growth Vector", val: "+14.2%", desc: "CREDIBILITY PULSE", icon: TrendingUp, color: "text-emerald-400", border: "border-emerald-500/20", bg: "bg-emerald-500/5", glow: "group-hover:shadow-[0_0_30px_rgba(16,185,129,0.1)]" },
+            ].map((stat, i) => (
+              <div key={i} className={`p-8 rounded-[2.5rem] border ${stat.border} bg-neutral-900/40 backdrop-blur-md space-y-4 group hover:border-white/20 transition-all ${stat.glow} relative overflow-hidden`}>
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                   <stat.icon className="w-20 h-20 rotate-12" />
+                </div>
+                <div className="flex items-center justify-between relative z-10">
+                  <div className={`p-3 rounded-2xl ${stat.bg} border border-white/5 shadow-inner`}>
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                  <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">{stat.desc}</span>
+                </div>
+                <div className="space-y-1 relative z-10">
+                  <div className="text-2xl font-black text-white tracking-tight">{stat.val}</div>
+                  <div className="text-[10px] font-black text-white/50 uppercase tracking-widest">{stat.label}</div>
+                </div>
+              </div>
+            ))}
+          </section>
+
+          {/* Achievement Badges */}
+          <AchievementBadges 
+            score={profile.score} 
+            profile={profile} 
+            breakdown={calculateCredibilityScore(profile).breakdown} 
+          />
         </main>
       </div>
-
-
-      {/* Achievement Badges */}
-      <AchievementBadges 
-        score={profile.score} 
-        profile={profile} 
-        breakdown={calculateCredibilityScore(profile).breakdown} 
-      />
 
       {/* Footer Meta */}
       <footer className="pt-8 text-center pb-12 border-t border-border mx-10">
@@ -1275,6 +1389,124 @@ function DashboardContent() {
       </AnimatePresence>
 
       <AnimatePresence>
+        {showLeetcodeInsights && leetcodeData && (
+          <div className="fixed inset-0 z-[115] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLeetcodeInsights(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
+            >
+              <div className="p-8 md:p-12 space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-orange-50 rounded-3xl text-orange-600 shadow-inner border border-orange-100">
+                      <Code2 className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-black text-foreground tracking-tight">LeetCode Intelligence</h2>
+                      <div className="flex items-center gap-2">
+                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Algorithmic Vector</span>
+                         <div className="h-1 w-1 rounded-full bg-slate-300" />
+                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">{getLeetCodeRank(leetcodeData.finalScore)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowLeetcodeInsights(false)} className="p-3 hover:bg-slate-100 rounded-full transition-colors border border-slate-100">
+                    <X className="w-6 h-6 text-slate-400" />
+                  </button>
+                </div>
+
+                {loadingLeetcode ? (
+                  <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-sm font-black text-slate-500 animate-pulse">Computing Algorithmic Intelligence...</p>
+                  </div>
+                ) : leetcodeError ? (
+                  <div className="py-20 text-center space-y-4">
+                    <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+                        <X className="w-10 h-10 text-red-500" />
+                    </div>
+                    <p className="text-sm font-bold text-red-500">{leetcodeError}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    <div className="flex flex-col md:flex-row gap-6 items-center bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                      <div className="flex-1 text-center md:text-left space-y-2">
+                        <div className="flex items-center justify-center md:justify-start gap-2">
+                           <h3 className="text-2xl font-black text-foreground tracking-tight">@{leetcodeData.username}</h3>
+                           <ExternalLink className="w-4 h-4 text-slate-300" />
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                           <div className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border border-orange-100">
+                              {leetcodeData.totalSolved} Solved
+                           </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Final Score</div>
+                        <div className="text-4xl font-black text-foreground">{leetcodeData.finalScore} <span className="text-lg text-slate-400">/ 100</span></div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="p-6 rounded-3xl bg-emerald-50/50 border border-emerald-100 hover:border-emerald-200 transition-colors group">
+                           <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">Easy</div>
+                           <div className="text-2xl font-black text-foreground">{leetcodeData.easy}</div>
+                        </div>
+                        <div className="p-6 rounded-3xl bg-amber-50/50 border border-amber-100 hover:border-amber-200 transition-colors group">
+                           <div className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Medium</div>
+                           <div className="text-2xl font-black text-foreground">{leetcodeData.medium}</div>
+                        </div>
+                        <div className="p-6 rounded-3xl bg-rose-50/50 border border-rose-100 hover:border-rose-200 transition-colors group">
+                           <div className="text-[10px] font-black uppercase tracking-widest text-rose-600 mb-1">Hard</div>
+                           <div className="text-2xl font-black text-foreground">{leetcodeData.hard}</div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Algorithmic Insights</h3>
+                      <div className="grid grid-cols-1 gap-3">
+                        {leetcodeData.insights.map((insight, i) => (
+                           <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                             <Lightbulb className="w-4 h-4 mt-0.5 text-orange-500 shrink-0" />
+                             <p className="text-xs font-semibold text-slate-700 leading-relaxed">{insight}</p>
+                           </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+                       <div>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Credovia Protocol Contribution</div>
+                          <div className="text-2xl font-black text-foreground">
+                            +{Math.min(Math.round((leetcodeData.finalScore / 100) * 15), 15)} Points
+                          </div>
+                        </div>
+                      <button 
+                        onClick={() => setShowLeetcodeInsights(false)}
+                        className="px-8 py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-slate-900/20"
+                      >
+                        Close Report
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {showLinkedinInsights && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <motion.div 
@@ -1419,7 +1651,12 @@ function DashboardContent() {
                 <div className="flex items-center justify-between">
                    <div className="flex items-center gap-3">
                       <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 border border-blue-100">
-                         {syncPlatform === "Alchemy / Web3" ? <LinkIcon className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
+                         {syncPlatform === "Alchemy / Web3" 
+                            ? <LinkIcon className="w-5 h-5" /> 
+                            : syncPlatform === "LeetCode" 
+                               ? <Code2 className="w-5 h-5 text-orange-600" />
+                               : <Globe className="w-5 h-5" />
+                         }
                       </div>
                       <div>
                         <h3 className="text-xl font-black text-foreground">Verification Protocol</h3>
@@ -1437,13 +1674,24 @@ function DashboardContent() {
                   {syncStep === "input" ? (
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                        {syncPlatform === "Alchemy / Web3" ? "Ethereum Wallet Address" : "Official Work Email"}
+                        {syncPlatform === "Alchemy / Web3" 
+                           ? "Ethereum Wallet Address" 
+                           : syncPlatform === "LeetCode"
+                              ? "LeetCode Username"
+                              : "Official Work Email"
+                        }
                       </label>
                       <input 
                         type="text"
                         value={syncInputValue}
                         onChange={(e) => setSyncInputValue(e.target.value)}
-                        placeholder={syncPlatform === "Alchemy / Web3" ? "0x..." : "name@company.com"}
+                        placeholder={
+                            syncPlatform === "Alchemy / Web3" 
+                               ? "0x..." 
+                               : syncPlatform === "LeetCode"
+                                  ? "johndoe"
+                                  : "name@company.com"
+                        }
                         disabled={isSubmittingSync}
                         className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300"
                       />
@@ -1469,14 +1717,16 @@ function DashboardContent() {
                     </div>
                   )}
 
-                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex gap-3">
+                    <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex gap-3">
                      <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0" />
                      <p className="text-[10px] text-amber-800 leading-relaxed font-bold italic">
                         {syncPlatform === "Alchemy / Web3" 
                           ? "Connecting your wallet will analyze your on-chain assets and transaction history to calculate your 35% weightage."
-                          : syncStep === "input" 
-                            ? "Entering your official email allows us to verify your professional identity and link your work domain to your profile."
-                            : "Verifying your official email adds 10% to your credibility score and confirms your corporate standing."}
+                          : syncPlatform === "LeetCode"
+                            ? "Connecting your LeetCode profile will analyze your algorithmic problem-solving performance and consistency for up to +15 bonus points."
+                            : syncStep === "input" 
+                              ? "Entering your official email allows us to verify your professional identity and link your work domain to your profile."
+                              : "Verifying your official email adds 10% to your credibility score and confirms your corporate standing."}
                      </p>
                   </div>
                 </div>
@@ -1508,6 +1758,107 @@ function DashboardContent() {
                   </button>
                 )}
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Social Share Modal */}
+      <AnimatePresence>
+        {showShareModal && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowShareModal(false)}
+              className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white/20 p-8 md:p-10 space-y-8"
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-black text-foreground tracking-tight">Share Reputation</h2>
+                <button onClick={() => setShowShareModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                  <X className="w-6 h-6 text-slate-400" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                 <button 
+                  onClick={() => {
+                    const url = encodeURIComponent(`https://credovia.io/profile/${profile.$id}`);
+                    const text = encodeURIComponent(`Check out my Verified Trust Score on Credovia: ${profile.score}/100!`);
+                    window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+                  }}
+                  className="w-full flex items-center gap-4 p-5 rounded-3xl bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 transition-all group"
+                 >
+                    <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                       <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .018 5.393 0 12.03c0 2.123.555 4.198 1.611 6.041L0 24l6.117-1.605a11.776 11.776 0 005.927 1.603h.005c6.635 0 12.032-5.396 12.035-12.034a11.761 11.761 0 00-3.535-8.503z"/></svg>
+                    </div>
+                    <div className="text-left">
+                       <div className="text-xs font-black uppercase tracking-widest text-emerald-600 mb-1">WhatsApp</div>
+                       <div className="text-sm font-bold text-slate-700">Share with friends</div>
+                    </div>
+                 </button>
+
+                 <button 
+                  onClick={() => {
+                    const subject = encodeURIComponent(`My Credovia Reputation Score`);
+                    const body = encodeURIComponent(`Check out my verified professional standing on Credovia. Trust Score: ${profile.score}/100.\n\nSee my profile: https://credovia.io/profile/${profile.$id}`);
+                    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                  }}
+                  className="w-full flex items-center gap-4 p-5 rounded-3xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-all group"
+                 >
+                    <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
+                       <Mail className="w-6 h-6" />
+                    </div>
+                    <div className="text-left">
+                       <div className="text-xs font-black uppercase tracking-widest text-blue-600 mb-1">Email</div>
+                       <div className="text-sm font-bold text-slate-700">Send via Mail</div>
+                    </div>
+                 </button>
+
+                 <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://credovia.io/profile/${profile.$id}`);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="w-full flex items-center gap-4 p-5 rounded-3xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-all group"
+                 >
+                    <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-slate-800/20 group-hover:scale-110 transition-transform">
+                       <LinkIcon className="w-6 h-6" />
+                    </div>
+                    <div className="text-left">
+                       <div className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">Copy Link</div>
+                       <div className="text-sm font-bold text-slate-700">{copied ? "Copied Correct! ✅" : "Copy Profile URL"}</div>
+                    </div>
+                 </button>
+
+                 <button 
+                  onClick={() => {
+                    downloadScoreCard();
+                    setShowShareModal(false);
+                  }}
+                  className="w-full flex items-center gap-4 p-5 rounded-3xl bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all group"
+                 >
+                    <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
+                       <Download className="w-6 h-6" />
+                    </div>
+                    <div className="text-left">
+                       <div className="text-xs font-black uppercase tracking-widest text-indigo-600 mb-1">Download Image</div>
+                       <div className="text-sm font-bold text-slate-700">Save as PNG</div>
+                    </div>
+                 </button>
+              </div>
+
+              <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-[0.2em]">
+                Secure Protocol Sharing
+              </p>
             </motion.div>
           </div>
         )}

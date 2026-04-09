@@ -31,11 +31,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo.png" />
+        {/* Force dark mode immediately, before any JS runs */}
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('dark');localStorage.setItem('credovia-theme','dark');` }} />
       </head>
-      <body className={`${inter.className} gradient-bg min-h-screen antialiased`}>
+      <body className={`${inter.className} min-h-screen antialiased bg-black text-white`}>
         <AuthProvider>
           <ThemeProvider>
             <Navbar />

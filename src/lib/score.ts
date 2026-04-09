@@ -14,16 +14,24 @@ export interface Profile {
   linkedin?: string;
   portfolio?: string;
   walletAddress?: string;
+  // LeetCode
+  leetcodeUsername?: string;
+  leetcodeEasy?: number;
+  leetcodeMedium?: number;
+  leetcodeHard?: number;
+  leetcodeScore?: number;    // 0–100 final score returned by scoring engine
+  leetcodeFetchedAt?: string;
   [key: string]: any;
 }
 
 export interface ScoreBreakdown {
-  crypto: number;      // 35%
-  github: number;      // 25%
-  identity: number;    // 15%
+  crypto: number;      // 15%
+  github: number;      // 35%
+  identity: number;    // 10%
   domain: number;      // 10%
-  behavior: number;    // 10%
-  peer: number;        // 5%
+  behavior: number;    // Legacy
+  peer: number;        // Legacy
+  leetcode: number;    // 30%
 }
 
 export function calculateCredibilityScore(profile: Profile, reviewCount: number = 0, averageRating: number = 0): { total: number, breakdown: ScoreBreakdown } {
@@ -33,72 +41,73 @@ export function calculateCredibilityScore(profile: Profile, reviewCount: number 
     identity: 0,
     domain: 0,
     behavior: 0,
-    peer: 0
+    peer: 0,
+    leetcode: 0,
   };
 
-  // 1. Crypto Wallet Analysis (Max 35 points)
+  // 1. Crypto Wallet Analysis (Max 15 points)
   if (profile.walletAddress?.startsWith('0x')) {
-    breakdown.crypto += 10; // Base presence
+    breakdown.crypto += 5; // Base presence
     
     // On-chain complexity sim
-    if (profile.walletAddress.length > 30) breakdown.crypto += 15; 
+    if (profile.walletAddress.length > 30) breakdown.crypto += 5; 
     
     // ENS Bonus (moved from domain to crypto as it's a structural asset)
     if (profile.walletAddress.endsWith('.eth')) {
-      breakdown.crypto += 10;
+      breakdown.crypto += 5;
     }
     
-    if (breakdown.crypto > 35) breakdown.crypto = 35;
+    if (breakdown.crypto > 15) breakdown.crypto = 15;
   }
 
-  // 2. GitHub Activity (Max 25 points)
+  // 2. GitHub Activity (Max 35 points)
   if (profile.github?.includes('github.com')) {
-    breakdown.github += 5; // Base presence
+    breakdown.github += 7; // Base presence
 
-    // Repository Count (Max 5 points)
+    // Repository Count (Max 7 points)
     if (profile.githubRepoCount) {
-      if (profile.githubRepoCount >= 20) breakdown.github += 5;
-      else if (profile.githubRepoCount >= 5) breakdown.github += 3;
-      else if (profile.githubRepoCount > 0) breakdown.github += 1;
+      if (profile.githubRepoCount >= 20) breakdown.github += 7;
+      else if (profile.githubRepoCount >= 5) breakdown.github += 4;
+      else if (profile.githubRepoCount > 0) breakdown.github += 2;
     }
 
-    // Stars / Quality (Max 5 points)
+    // Stars / Quality (Max 7 points)
     if (profile.githubStarCount) {
-      if (profile.githubStarCount >= 50) breakdown.github += 5;
-      else if (profile.githubStarCount >= 10) breakdown.github += 3;
-      else if (profile.githubStarCount >= 1) breakdown.github += 1;
+      if (profile.githubStarCount >= 50) breakdown.github += 7;
+      else if (profile.githubStarCount >= 10) breakdown.github += 4;
+      else if (profile.githubStarCount >= 1) breakdown.github += 2;
     }
 
-    // Account Longevity (Max 5 points)
+    // Account Longevity (Max 7 points)
     if (profile.githubCreatedAt) {
       const createdDate = new Date(profile.githubCreatedAt);
       const yearsOld = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
-      if (yearsOld >= 3) breakdown.github += 5;
-      else if (yearsOld >= 1) breakdown.github += 3;
-      else if (yearsOld >= 0.2) breakdown.github += 1;
+      if (yearsOld >= 3) breakdown.github += 7;
+      else if (yearsOld >= 1) breakdown.github += 4;
+      else if (yearsOld >= 0.2) breakdown.github += 2;
     }
 
-    // Community & Contributions (Max 5 points)
+    // Community & Contributions (Max 7 points)
     const combinedActivity = (profile.githubFollowerCount || 0) + 
                              (profile.githubContributionCount || 0) / 10 +
                              (profile.githubPRCount || 0) / 5;
-    if (combinedActivity >= 50) breakdown.github += 5;
-    else if (combinedActivity >= 10) breakdown.github += 3;
-    else if (combinedActivity > 0) breakdown.github += 1;
+    if (combinedActivity >= 50) breakdown.github += 7;
+    else if (combinedActivity >= 10) breakdown.github += 4;
+    else if (combinedActivity > 0) breakdown.github += 2;
     
-    if (breakdown.github > 25) breakdown.github = 25;
+    if (breakdown.github > 35) breakdown.github = 35;
   }
 
-  // 3. Verified Identity (Max 15 points)
+  // 3. Verified Identity (Max 10 points)
   // Email check
   if (profile.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) {
-    breakdown.identity += 5;
+    breakdown.identity += 3;
   }
   // LinkedIn SSO check
   if (profile.linkedin && profile.linkedin.includes('verified')) {
-    breakdown.identity += 10;
+    breakdown.identity += 7;
   }
-  if (breakdown.identity > 15) breakdown.identity = 15;
+  if (breakdown.identity > 10) breakdown.identity = 10;
 
   // 4. Official Domain Verification (Max 10 points)
   if (profile.portfolio && (profile.portfolio.startsWith('http') || profile.portfolio.includes('.'))) {
@@ -119,8 +128,13 @@ export function calculateCredibilityScore(profile: Profile, reviewCount: number 
     breakdown.peer = 1;
   }
 
+  // 7. LeetCode Score (Max 30 points)
+  if (profile.leetcodeScore !== undefined && profile.leetcodeScore > 0) {
+    breakdown.leetcode = Math.min(Math.round((profile.leetcodeScore / 100) * 30), 30);
+  }
+
   const total = Math.min(
-    breakdown.crypto + breakdown.github + breakdown.identity + breakdown.domain + breakdown.behavior + breakdown.peer, 
+    breakdown.crypto + breakdown.github + breakdown.identity + breakdown.domain + breakdown.leetcode,
     100
   );
 

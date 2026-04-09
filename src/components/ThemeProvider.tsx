@@ -15,12 +15,12 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("credovia-theme") as Theme | null;
-    const initial = stored || "light";
+    const initial = stored || "dark";
     setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");
     setMounted(true);

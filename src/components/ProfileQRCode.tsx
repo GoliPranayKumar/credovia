@@ -55,7 +55,7 @@ export function ProfileQRCode({ profileId, name }: ProfileQRCodeProps) {
       {/* Trigger Button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-black text-xs rounded-2xl shadow-sm hover:-translate-y-0.5 active:scale-95 transition-all border border-emerald-500/20 uppercase tracking-widest"
+        className="flex items-center gap-2 px-5 py-3 bg-neutral-900 border border-white/20 text-white hover:bg-neutral-800 font-black text-xs rounded-2xl shadow-sm hover:-translate-y-0.5 active:scale-95 transition-all uppercase tracking-widest"
       >
         <QrCode className="w-4 h-4" />
         Share QR
@@ -67,7 +67,7 @@ export function ProfileQRCode({ profileId, name }: ProfileQRCodeProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -76,42 +76,42 @@ export function ProfileQRCode({ profileId, name }: ProfileQRCodeProps) {
               exit={{ scale: 0.9, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-card rounded-[2rem] border border-border shadow-2xl p-8 w-full max-w-sm space-y-6"
+              className="bg-[#0a0a0a] rounded-[2rem] border border-white/10 shadow-2xl p-8 w-full max-w-sm space-y-6"
             >
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-black text-foreground">Share Profile</h3>
-                  <p className="text-xs text-muted-foreground">Scan to view {name}&apos;s Credovia profile</p>
+                  <h3 className="text-lg font-black text-white">Share Profile</h3>
+                  <p className="text-xs text-neutral-400">Scan to view {name}&apos;s Protocol identity</p>
                 </div>
                 <button
                   onClick={() => setOpen(false)}
-                  className="w-8 h-8 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+                  className="w-8 h-8 rounded-xl bg-neutral-800/50 flex items-center justify-center hover:bg-neutral-800 transition-colors border border-neutral-700/50"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-white" />
                 </button>
               </div>
 
               {/* QR Code */}
               <div
                 ref={qrRef}
-                className="flex items-center justify-center p-6 bg-white rounded-2xl border border-border shadow-inner"
+                className="flex items-center justify-center p-6 bg-white rounded-2xl border border-neutral-200 shadow-inner"
               >
                 <QRCode
                   value={profileUrl}
                   size={200}
-                  fgColor="#1e1b4b"
+                  fgColor="#000000"
                   bgColor="#ffffff"
                   level="M"
                 />
               </div>
 
               {/* URL */}
-              <div className="flex items-center gap-2 p-3 bg-muted/40 rounded-xl border border-border">
-                <p className="flex-1 text-[10px] font-mono text-muted-foreground truncate">{profileUrl}</p>
+              <div className="flex items-center gap-2 p-3 bg-neutral-900/40 rounded-xl border border-white/10">
+                <p className="flex-1 text-[10px] font-mono text-neutral-400 truncate">{profileUrl}</p>
                 <button
                   onClick={copyUrl}
-                  className="shrink-0 p-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 transition-colors text-violet-600"
+                  className="shrink-0 p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 transition-colors text-white"
                 >
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
@@ -120,7 +120,7 @@ export function ProfileQRCode({ profileId, name }: ProfileQRCodeProps) {
               {/* Actions */}
               <button
                 onClick={downloadQR}
-                className="w-full py-3 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-black text-xs rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-95 transition-all"
+                className="w-full py-3 bg-white text-black hover:bg-neutral-200 font-black text-xs rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-95 transition-all"
               >
                 <Download className="w-4 h-4" />
                 Download QR Code
