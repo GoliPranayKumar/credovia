@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from '@/lib/appwrite';
-import { recalculateAndSyncScore } from '@/lib/score';
+import { recalculateAndSyncScore, type Profile } from '@/lib/score';
 
 function getScoreColorHex(score: number): string {
     if (score >= 90) return "#10B981"; // Emerald
@@ -21,7 +21,7 @@ export async function GET(
     const resolvedParams = await params;
     
     // Fetch profile and dynamic score
-    const p = await databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, resolvedParams.id);
+    const p = await databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, resolvedParams.id) as unknown as Profile;
     const { total: score } = await recalculateAndSyncScore(resolvedParams.id, p, false);
     
     const color = getScoreColorHex(score);
