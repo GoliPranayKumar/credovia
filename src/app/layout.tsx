@@ -41,7 +41,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             <Navbar />
-            <main className="pt-24 pb-12 px-6">
+            <main className="pt-32 md:pt-44 pb-12 px-6">
               <div className="max-w-7xl mx-auto">
                 {children}
               </div>

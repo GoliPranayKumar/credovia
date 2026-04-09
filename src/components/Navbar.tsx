@@ -4,18 +4,15 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { 
-  ShieldCheck, 
-  Search, 
   LayoutDashboard, 
-  Sun, 
-  Moon, 
   Trophy, 
-  User, 
-  LogOut, 
-  Edit3, 
   ChevronDown,
   Menu,
-  X 
+  X,
+  Edit3,
+  LogOut,
+  Bell,
+  Zap
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,22 +23,17 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Navbar() {
   const pathname = usePathname();
   const { user, profile, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Handle scroll for premium floating effect
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdown/menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -52,41 +44,42 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close menus on navigation
-  useEffect(() => {
-    setShowDropdown(false);
-    setShowMobileMenu(false);
-  }, [pathname]);
-
   const navItems = [
     { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, protected: true },
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none p-4 md:p-6">
+    <div className="fixed top-0 left-0 right-0 z-[100] flex justify-center pointer-events-none p-4 md:p-6">
       <nav 
         className={cn(
-          "w-full max-w-7xl pointer-events-auto transition-all duration-500 ease-in-out flex items-center justify-between",
+          "w-full max-w-7xl pointer-events-auto transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] flex items-center justify-between",
           scrolled 
-            ? "glass rounded-3xl md:rounded-[2.5rem] px-5 md:px-8 py-2.5 md:py-3 shadow-2xl shadow-primary/10 border border-white/20 dark:border-white/10 blur-sm-0 bg-white/70 dark:bg-card/70"
-            : "px-2 py-4 border-b border-transparent"
+            ? "glass rounded-[2.5rem] px-4 md:px-10 py-3 md:py-4 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10"
+            : "px-2 py-4"
         )}
       >
-        {/* Left: Branding */}
-        <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105 active:scale-95 shrink-0">
+        {/* Left: Branding with Pulse */}
+        <Link href="/" className="flex items-center gap-3 group transition-all hover:scale-105 active:scale-95 shrink-0 relative">
+          <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full animate-pulse" />
           <img 
             src="/logo.png" 
             alt="Credovia Logo" 
             className={cn(
-              "transition-all duration-500 object-contain mix-blend-multiply brightness-110",
-              scrolled ? "h-9 md:h-11" : "h-11 md:h-16"
+              "transition-all duration-700 object-contain relative z-10",
+              scrolled ? "h-10 md:h-12" : "h-12 md:h-20"
             )}
           />
+          {!scrolled && (
+             <div className="hidden lg:flex flex-col -space-y-1">
+                <span className="text-lg font-black tracking-tighter text-foreground">CREDOVIA</span>
+                <span className="text-[8px] font-black text-primary tracking-[0.5em] uppercase">Protocol</span>
+             </div>
+          )}
         </Link>
 
-        {/* Center: Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-1 bg-secondary/30 p-1 rounded-2xl border border-border/40">
+        {/* Center: Animated Nav Selection */}
+        <div className="hidden md:flex items-center p-1.5 bg-neutral-900/40 backdrop-blur-xl rounded-[2rem] border border-white/5 shadow-inner">
           {navItems.map((item) => {
             if (item.protected && !user) return null;
             const Icon = item.icon;
@@ -96,123 +89,125 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex items-center gap-2 px-5 py-2 text-xs font-black uppercase tracking-widest transition-all rounded-xl",
-                  isActive 
-                    ? "text-primary bg-white dark:bg-card shadow-sm border border-border/50" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-card/50"
+                  "relative px-7 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2.5 group",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className={cn("w-3.5 h-3.5 transition-transform", isActive && "scale-110")} />
-                {item.name}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-full shadow-lg border border-white/10"
+                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                  />
+                )}
+                <Icon className={cn("w-3.5 h-3.5 relative z-10 transition-transform", isActive ? "scale-110" : "group-hover:translate-y-[-1px]")} />
+                <span className="relative z-10">{item.name}</span>
               </Link>
             );
           })}
         </div>
 
-        {/* Right: Actions & Profile */}
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="flex items-center gap-2 bg-secondary/30 p-1 rounded-2xl border border-border/40">
+        {/* Right: Actions Cluster */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {user && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20 rounded-full">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Protocol Sync</span>
+            </div>
+          )}
 
-            {/* Notifications */}
-            {user && (
+          {user ? (
+            <div className="flex items-center gap-3">
               <div className="hidden sm:block">
                 <NotificationsPanel userId={user.$id} />
               </div>
-            )}
-          </div>
+              
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center gap-2 p-1 pl-2 md:pl-5 bg-neutral-900/80 border border-white/10 rounded-full hover:bg-neutral-800 transition-all active:scale-95 shadow-xl group border-l-primary/30"
+                >
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/90 mr-2 hidden lg:block">
+                    {user.name?.split(' ')[0]}
+                  </span>
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center text-xs font-black text-white border-2 border-white shadow-lg overflow-hidden relative">
+                     <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                     {profile?.avatar ? (
+                       <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                     ) : (
+                       (profile?.name || user.name || "U")[0]
+                     )}
+                  </div>
+                  <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground mr-2 transition-transform hidden sm:block", showDropdown && "rotate-180")} />
+                </button>
 
-          <div className="h-8 w-px bg-border/50 mx-1 hidden md:block" />
-
-          {user ? (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 p-1 pl-2 md:pl-3 rounded-full border border-border/60 bg-white/50 hover:bg-white transition-all active:scale-95 shadow-sm group"
-              >
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-1 hidden lg:block">
-                  {user.name?.split(' ')[0]}
-                </span>
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-white to-neutral-400 flex items-center justify-center text-[10px] md:text-[12px] font-black text-black border-2 border-white shadow-sm transition-transform group-hover:scale-105">
-                  {(profile?.name || user.name || "U")[0]}
-                </div>
-                <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform hidden sm:block", showDropdown && "rotate-180")} />
-              </button>
-
-              <AnimatePresence>
-                {showDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-3 w-64 rounded-3xl glass border border-border shadow-2xl p-2 z-[60]"
-                  >
-                    <div className="px-4 py-4 border-b border-border/50 mb-1">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Protocol Identity</p>
-                      <p className="text-sm font-black text-foreground truncate">{user.name}</p>
-                      <p className="text-[10px] font-bold text-muted-foreground truncate opacity-70 tracking-tight">{user.email}</p>
-                    </div>
-
-                    <div className="p-1 space-y-1">
-                      <Link 
-                        href="/dashboard?edit=true"
-                        className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl hover:bg-primary/10 text-foreground transition-colors group"
-                      >
-                        <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                          <Edit3 className="w-4 h-4" />
+                <AnimatePresence>
+                  {showDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                      className="absolute right-0 mt-4 w-72 rounded-[2.5rem] bg-neutral-900/95 backdrop-blur-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] p-3 z-10"
+                    >
+                      <div className="p-6 bg-white/5 rounded-3xl mb-2 border border-white/5">
+                        <div className="flex items-center gap-3 mb-3">
+                           <div className="p-2 bg-primary/20 rounded-xl">
+                              <Zap className="w-4 h-4 text-primary" />
+                           </div>
+                           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-primary">Identity Verified</span>
                         </div>
-                        <span className="text-xs font-black uppercase tracking-widest">Edit Profile</span>
-                      </Link>
+                        <p className="text-sm font-black text-foreground">{user.name}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold opacity-60 italic">{user.email}</p>
+                      </div>
 
-                      <Link 
-                        href="/dashboard"
-                        className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl hover:bg-secondary text-foreground transition-colors group"
-                      >
-                        <div className="p-2 rounded-xl bg-secondary text-muted-foreground group-hover:bg-foreground group-hover:text-white transition-colors">
-                          <LayoutDashboard className="w-4 h-4" />
-                        </div>
-                        <span className="text-xs font-black uppercase tracking-widest">Dashboard</span>
-                      </Link>
+                      <div className="space-y-1">
+                        <Link 
+                          href="/dashboard?edit=true"
+                          className="flex items-center justify-between w-full px-5 py-3.5 rounded-2xl hover:bg-white/5 text-foreground transition-all group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Edit3 className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <span className="text-[11px] font-black uppercase tracking-widest">Protocol Settings</span>
+                          </div>
+                          <ChevronDown className="w-3.5 h-3.5 -rotate-90 opacity-30" />
+                        </Link>
 
-                      <div className="h-px bg-border/50 my-1 mx-2" />
-
-                      <button
-                        onClick={() => {
-                          logout();
-                          setShowDropdown(false);
-                        }}
-                        className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl hover:bg-red-500/10 text-red-500 transition-colors group"
-                      >
-                        <div className="p-2 rounded-xl bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
-                          <LogOut className="w-4 h-4" />
-                        </div>
-                        <span className="text-xs font-black uppercase tracking-widest">Disconnect</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        <button
+                          onClick={logout}
+                          className="flex items-center justify-between w-full px-5 py-3.5 rounded-2xl hover:bg-red-500/10 text-red-400 transition-all group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <LogOut className="w-4 h-4" />
+                            <span className="text-[11px] font-black uppercase tracking-widest">Terminate Session</span>
+                          </div>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           ) : (
             <Link
               href="/login"
-              className="bg-primary text-white px-6 md:px-8 py-2 md:py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 transition-all"
+              className="group relative inline-flex items-center gap-4 bg-primary text-white px-8 py-3.5 rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-xl shadow-primary/30"
             >
-              Get Started
+              <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-in-out" />
+              <span className="relative z-10 text-xs font-black uppercase tracking-[0.2em]">Initiate Access</span>
+              <Zap className="w-4 h-4 relative z-10 animate-pulse text-blue-200" />
             </Link>
           )}
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Orchestration */}
           <button 
             onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="md:hidden w-10 h-10 rounded-2xl border border-border/60 bg-white/50 flex items-center justify-center text-foreground active:scale-90 transition-transform"
+            className="md:hidden w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-foreground hover:bg-white/10 transition-all"
           >
-            {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Drawer (Uses same logic as before but with refined styling) */}
       <AnimatePresence>
         {showMobileMenu && (
           <>
@@ -221,26 +216,23 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileMenu(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden pointer-events-auto"
+              className="fixed inset-0 bg-black/80 backdrop-blur-2xl z-[150] md:hidden"
             />
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-white dark:bg-card z-50 border-l border-border shadow-2xl md:hidden flex flex-col pointer-events-auto overflow-hidden rounded-l-[2.5rem]"
+              transition={{ type: "spring", damping: 30, stiffness: 200 }}
+              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-[380px] bg-neutral-900 z-[160] border-l border-white/10 shadow-2xl md:hidden flex flex-col p-8 rounded-l-[3rem]"
             >
-              <div className="p-8 flex items-center justify-between border-b border-border/50">
-                 <div className="flex flex-col">
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Protocol</span>
-                   <span className="text-lg font-black text-foreground">Navigation</span>
-                 </div>
-                 <button onClick={() => setShowMobileMenu(false)} className="w-10 h-10 flex items-center justify-center bg-secondary/50 hover:bg-secondary rounded-2xl transition-colors">
-                    <X className="w-5 h-5" />
+              <div className="flex items-center justify-between mb-12">
+                 <img src="/logo.png" alt="Logo" className="h-10 mix-blend-multiply brightness-110" />
+                 <button onClick={() => setShowMobileMenu(false)} className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
+                    <X className="w-6 h-6" />
                  </button>
               </div>
 
-              <div className="p-6 flex-1 space-y-3">
+              <div className="space-y-4 flex-1">
                 {navItems.map((item) => {
                   if (item.protected && !user) return null;
                   const Icon = item.icon;
@@ -249,37 +241,50 @@ export default function Navbar() {
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={() => setShowMobileMenu(false)}
                       className={cn(
-                        "flex items-center gap-4 px-5 py-5 rounded-3xl transition-all font-black uppercase tracking-widest text-xs",
+                        "flex items-center justify-between p-6 rounded-[2rem] transition-all border",
                         isActive 
-                          ? "bg-primary text-white shadow-xl shadow-primary/20" 
-                          : "text-foreground hover:bg-secondary border border-transparent hover:border-border/50"
+                          ? "bg-primary border-primary text-white shadow-2xl shadow-primary/20" 
+                          : "bg-white/5 border-white/5 text-foreground hover:bg-white/10"
                       )}
                     >
-                      <Icon className="w-4 h-4" />
-                      <span>{item.name}</span>
+                      <div className="flex items-center gap-5">
+                        <Icon className="w-6 h-6" />
+                        <span className="text-sm font-black uppercase tracking-[0.2em]">{item.name}</span>
+                      </div>
+                      <Zap className={cn("w-4 h-4", isActive ? "text-blue-200" : "opacity-0")} />
                     </Link>
                   );
                 })}
               </div>
 
-              <div className="p-8 border-t border-border/50 bg-secondary/20">
+              <div className="pt-8 mt-auto border-t border-white/10">
                  {user ? (
-                   <div className="flex items-center gap-4 p-4 rounded-3xl bg-white dark:bg-card border border-border/50">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-neutral-400 flex items-center justify-center font-black text-black shadow-lg">
-                        {user.name[0]}
+                   <div className="p-6 bg-white/5 rounded-[2.5rem] border border-white/10">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center text-xl font-black text-white shadow-xl">
+                          {user.name[0]}
+                        </div>
+                        <div>
+                          <p className="text-base font-black tracking-tight">{user.name}</p>
+                          <p className="text-[10px] text-primary font-black uppercase tracking-[0.3em]">Protocol Master</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black truncate">{user.name}</p>
-                        <p className="text-[10px] text-muted-foreground truncate font-bold">Authenticated User</p>
-                      </div>
+                      <button 
+                        onClick={logout}
+                        className="w-full py-5 bg-red-500/10 text-red-400 font-black uppercase tracking-widest text-xs rounded-3xl border border-red-500/20"
+                      >
+                        Disconnect Sync
+                      </button>
                    </div>
                  ) : (
                    <Link 
                     href="/login"
-                    className="flex items-center justify-center gap-2 w-full py-5 bg-primary text-white font-black uppercase tracking-[0.2em] text-xs rounded-3xl shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="flex items-center justify-center gap-3 w-full py-6 bg-primary text-white font-black uppercase tracking-[0.2em] text-xs rounded-[2.5rem] shadow-2xl shadow-primary/40"
                    >
-                     Login to Protocol <ArrowRight className="w-4 h-4" />
+                     Initiate Protocol <Zap className="w-4 h-4 animate-pulse" />
                    </Link>
                  )}
               </div>
@@ -291,21 +296,3 @@ export default function Navbar() {
   );
 }
 
-// Fixed arrow right icon helper missing in original imports but used in mobile footer
-function ArrowRight({ className }: { className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-    </svg>
-  );
-}

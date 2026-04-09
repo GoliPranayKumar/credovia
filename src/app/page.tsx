@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div className="space-y-32">
       {/* Hero Section */}
-      <section className="relative pt-12 lg:pt-24 pb-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
+      <section className="relative pt-4 lg:pt-8 pb-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
         
         {/* Left Column - Text Content */}
         <div className="flex-1 space-y-8 text-center lg:text-left z-10">

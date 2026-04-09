@@ -7,44 +7,40 @@ import { ScoreProgress, ScoreBreakdownView, ScoreGauge } from "@/components/Scor
 import { 
   Github, 
   Linkedin, 
-  Globe, 
+  CheckCircle2, 
+  X, 
+  Loader2, 
   ExternalLink, 
-  Edit3, 
-  Save, 
-  Loader2,
-  LogOut,
-  ShieldCheck,
-  Lock as LockIcon,
+  RefreshCw, 
+  ShieldCheck, 
+  Search, 
+  TrendingUp, 
+  Globe, 
+  Lock, 
+  Link as LinkIcon, 
+  Rocket, 
+  Users2, 
+  Activity, 
+  FileText, 
+  QrCode, 
+  Share2, 
+  Award, 
+  Zap, 
+  Layers, 
+  Star, 
+  Code2, 
+  Lightbulb, 
+  ChevronRight, 
+  LayoutDashboard, 
+  Target, 
+  Fingerprint, 
   Download,
-  Award,
-  RefreshCw,
-  Link as LinkIcon,
-  LayoutDashboard,
-  Fingerprint,
-  TrendingUp,
-  Users,
-  Share2,
-  Mail,
-  CheckCircle2,
-  Star,
-  GitBranch,
-  Calendar,
-  Zap,
-  Users2,
-  FileText,
-  UserPlus,
-  Activity,
-  X,
-  ArrowRight,
-  Rocket,
-  Search,
-  Layers,
-  GitPullRequest,
-  Code2,
-  Trophy as TrophyIcon,
-  BarChart3,
-  Lightbulb
+  Terminal,
+  MousePointer2,
+  Cpu,
+  Shield
 } from "lucide-react";
+import { InsightModals } from "@/components/dashboard/InsightModals";
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite";
 import { calculateCredibilityScore, getScoreDescription } from "@/lib/score";
 import { analyzeWallet } from "@/lib/alchemy";
@@ -104,13 +100,11 @@ function DashboardContent() {
   const handleSync = async (platform: string) => {
     if (platform === "GitHub SSO") {
        setSyncing("GitHub SSO");
-       // Small delay to show state before redirect
        setTimeout(() => loginWithGithub(), 500);
        return;
     }
     if (platform === "LinkedIn") {
        setSyncing("LinkedIn");
-       // Small delay to show state before redirect
        setTimeout(() => loginWithLinkedin(), 500);
        return;
     }
@@ -124,7 +118,6 @@ function DashboardContent() {
       return;
     }
     
-    // For others, show our custom in-app modal instead of browser prompt
     setSyncPlatform(platform);
     setSyncInputValue("");
     setSyncOtpValue("");
@@ -143,7 +136,6 @@ function DashboardContent() {
           setIsSubmittingSync(false);
           return;
         }
-        // Step 1: Send OTP to the official email
         const tempUserId = await sendEmailToken(syncInputValue);
         setSyncUserId(tempUserId);
         setSyncStep("otp");
@@ -161,7 +153,6 @@ function DashboardContent() {
         }
         updateData.walletAddress = syncInputValue;
       } else if (syncPlatform === "Official Domain") {
-        // Step 2: Verify OTP
         if (!syncOtpValue) {
           alert("Please enter the verification code.");
           setIsSubmittingSync(false);
@@ -169,9 +160,6 @@ function DashboardContent() {
         }
 
         try {
-          // We must verify the code by creating a session.
-          // Note: This temporarily switches the current session to the guest user.
-          // We'll update the database using the new session, then the user should refresh.
           await loginWithToken(syncUserId, syncOtpValue); 
         } catch (err: any) {
           console.error("OTP Verification Error:", err);
@@ -190,7 +178,6 @@ function DashboardContent() {
           setIsSubmittingSync(false);
           return;
         }
-        // Validate existence by calling our API
         const res = await fetch(`/api/leetcode-score/${encodeURIComponent(lc)}`);
         const lcData = await res.json();
         if (!res.ok) {
@@ -264,7 +251,6 @@ function DashboardContent() {
         }));
         const data = await response.json();
         if (response.ok) {
-          // If the profile is verified via SSO, we prioritize that data
           if (profile.linkedin.includes('verified')) {
              data.isVerified = true;
              data.name = profile.name;
@@ -285,7 +271,6 @@ function DashboardContent() {
     setShowDomainInsights(true);
     if (!domainData && profile.portfolio) {
       setLoadingDomain(true);
-      // Simulate analysis or fetch real meta-data
       setTimeout(() => {
         const domain = new URL(profile.portfolio).hostname;
         setDomainData({
@@ -306,7 +291,7 @@ function DashboardContent() {
     setLeetcodeError(null);
     const username = profile.leetcodeUsername;
     if (!username) return;
-    if (leetcodeData && leetcodeData.username === username) return; // already loaded
+    if (leetcodeData && leetcodeData.username === username) return;
     setLoadingLeetcode(true);
     try {
       const res = await fetch(`/api/leetcode-score/${encodeURIComponent(username)}`);
@@ -317,7 +302,6 @@ function DashboardContent() {
       }
       setLeetcodeData(data as any);
 
-      // Persist to Appwrite so the credibility score updates
       const updateData: any = {
         leetcodeEasy:      data.easy,
         leetcodeMedium:    data.medium,
@@ -345,7 +329,6 @@ function DashboardContent() {
 
   useEffect(() => {
     if (user) {
-      console.log("DEBUG: Current User:", user);
     }
     if (!loading && !user) {
       router.push("/login");
@@ -438,15 +421,11 @@ function DashboardContent() {
   };
 
   const handleSendVerification = async () => {
-    console.log("DEBUG: handleSendVerification clicked");
     setSendingVerification(true);
     try {
-      console.log("DEBUG: Calling sendVerificationEmail from hook...");
       await sendVerificationEmail();
-      console.log("DEBUG: sendVerificationEmail call finished successfully");
       setVerificationSent(true);
     } catch (err: any) {
-      console.error("DEBUG: handleSendVerification caught error:", err);
       alert(`Failed to send verification email: ${err.message || "Unknown error"}`);
     } finally {
       setSendingVerification(false);
@@ -709,11 +688,11 @@ function DashboardContent() {
 
             <div className="w-full pt-6 mt-2 space-y-3">
               <button 
-                onClick={downloadCertificate}
+                onClick={downloadScoreCard}
                 className="w-full flex items-center justify-center gap-3 py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all group relative overflow-hidden border border-indigo-500 hover:bg-indigo-500"
               >
                 <Award className="w-4 h-4" /> 
-                <span className="text-xs uppercase tracking-widest">Download Protocol</span>
+                <span className="text-xs uppercase tracking-widest">Download Scorecard</span>
                 <Download className="w-4 h-4 opacity-50" />
               </button>
               <button 
@@ -961,674 +940,30 @@ function DashboardContent() {
         </p>
       </footer>
 
-      {/* GitHub Detailed Insights Modal */}
-      <AnimatePresence>
-        {showGithubInsights && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowGithubInsights(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
-            >
-              <div className="p-8 space-y-8">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-4 bg-blue-50 rounded-2xl text-blue-800 border border-blue-100">
-                      <Github className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-black text-foreground leading-tight">GitHub Evaluation</h2>
-                      <p className="text-sm text-muted-foreground font-medium italic">Protocol Depth Analysis</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setShowGithubInsights(false)}
-                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                  >
-                    <X className="w-6 h-6 text-muted-foreground" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {githubStats.map((stat, i) => (
-                    <div key={i} className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-primary/30 transition-all group">
-                      <div className="flex items-center justify-between">
-                        <stat.icon className="w-5 h-5 text-blue-400 group-hover:text-primary transition-colors" />
-                        {stat.pts > 0 && (
-                           <span className="text-[8px] font-black text-primary px-1.5 py-0.5 bg-primary/10 rounded-full">+{stat.pts} MAX</span>
-                        )}
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="text-lg font-black text-foreground">{stat.value}</div>
-                        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{stat.label}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-600/60 ml-1">Deep Intelligence Insights</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {[
-                      { 
-                        check: (profile.githubStarCount > 50), 
-                        icon: Rocket, 
-                        color: "text-emerald-600", 
-                        bg: "bg-emerald-50",
-                        border: "border-emerald-100",
-                        title: "High Impact Creator", 
-                        desc: "Your code repository stars indicate significant community trust and architectural stability." 
-                      },
-                      { 
-                        check: (profile.githubFollowerCount > 100), 
-                        icon: Users2, 
-                        color: "text-blue-600", 
-                        bg: "bg-blue-50",
-                        border: "border-blue-100",
-                        title: "Ecosystem Influencer", 
-                        desc: "Your follower count puts you in the top tier of social credibility within the developer network." 
-                      },
-                      { 
-                        check: (profile.githubContributionCount > 500), 
-                        icon: Activity, 
-                        color: "text-indigo-600", 
-                        bg: "bg-indigo-50",
-                        border: "border-indigo-100",
-                        title: "Consistency Vector: High", 
-                        desc: "Exceptional code velocity over time. This metric significantly stabilizes your credibility score." 
-                      },
-                      { 
-                        check: (profile.githubGistCount > 5), 
-                        icon: FileText, 
-                        color: "text-amber-600", 
-                        bg: "bg-amber-50",
-                        border: "border-amber-100",
-                        title: "Knowledge Sharer", 
-                        desc: "Frequent Gist activity suggests a high degree of transparency and technical documentation focus." 
-                      }
-                    ].filter(insight => insight.check).map((insight, i) => (
-                      <div key={i} className={`p-4 rounded-[2rem] ${insight.bg} ${insight.border} border space-y-2`}>
-                        <div className="flex items-center gap-2">
-                          <insight.icon className={`w-4 h-4 ${insight.color}`} />
-                          <h4 className={`text-xs font-black ${insight.color} uppercase tracking-tight`}>{insight.title}</h4>
-                        </div>
-                        <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">{insight.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-border flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Total GitHub Weighted Vector</div>
-                    <div className="text-3xl font-black text-foreground">
-                      {calculateCredibilityScore(profile).breakdown.github} <span className="text-sm text-muted-foreground">/ 25 Pts</span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setShowGithubInsights(false)}
-                    className="px-8 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-600 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-primary/20"
-                  >
-                    Close Report
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Alchemy Detailed Insights Modal */}
-      <AnimatePresence>
-        {showAlchemyInsights && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowAlchemyInsights(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
-            >
-              <div className="p-8 space-y-8">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-800 border border-indigo-100">
-                      <LinkIcon className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-black text-foreground leading-tight">Web3 Evaluation</h2>
-                      <p className="text-sm text-muted-foreground font-medium italic">On-Chain Asset Analysis</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setShowAlchemyInsights(false)}
-                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                  >
-                    <X className="w-6 h-6 text-muted-foreground" />
-                  </button>
-                </div>
-
-                {loadingAlchemy ? (
-                  <div className="py-20 flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-                    <p className="text-sm font-bold text-muted-foreground tracking-widest uppercase">Querying Blockchain...</p>
-                  </div>
-                ) : alchemyData ? (
-                  <>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-indigo-400/30 transition-all group">
-                        <div className="flex items-center justify-between">
-                          <Award className="w-5 h-5 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
-                          <span className="text-[8px] font-black text-indigo-600 px-1.5 py-0.5 bg-indigo-600/10 rounded-full">NFTS</span>
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="text-lg font-black text-foreground">{alchemyData.nfts}</div>
-                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Total Assets</div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-amber-400/30 transition-all group">
-                        <div className="flex items-center justify-between">
-                          <Zap className="w-5 h-5 text-amber-400 group-hover:text-amber-500 transition-colors" />
-                          <span className="text-[8px] font-black text-amber-600 px-1.5 py-0.5 bg-amber-600/10 rounded-full">ETH</span>
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="text-lg font-black text-foreground">{alchemyData.balance?.substring(0, 6) || "0.00"}</div>
-                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Balance</div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-blue-400/30 transition-all group">
-                        <div className="flex items-center justify-between">
-                          <Activity className="w-5 h-5 text-blue-400 group-hover:text-blue-500 transition-colors" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="text-lg font-black text-foreground">{alchemyData.transactionCount || 0}</div>
-                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Recent Txns</div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-pink-400/30 transition-all group">
-                        <div className="flex items-center justify-between">
-                          <Layers className="w-5 h-5 text-pink-400 group-hover:text-pink-500 transition-colors" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="text-lg font-black text-foreground">{alchemyData.tokenDiversity || 0}</div>
-                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Token Types</div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-2 hover:border-emerald-400/30 transition-all group">
-                        <div className="flex items-center justify-between">
-                          <ShieldCheck className="w-5 h-5 text-emerald-400 group-hover:text-emerald-500 transition-colors" />
-                          <span className="text-[8px] font-black text-emerald-600 px-1.5 py-0.5 bg-emerald-600/10 rounded-full">STATUS</span>
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="text-md mt-1 font-black text-foreground">{alchemyData.isVerified ? 'VERIFIED' : 'PENDING'}</div>
-                          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">On-Chain</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-600/60 ml-1">Protocol Insights</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {alchemyData.nfts > 0 && (
-                           <div className="p-4 rounded-[2rem] bg-indigo-50 border border-indigo-100 space-y-2">
-                             <div className="flex items-center gap-2">
-                               <Fingerprint className="w-4 h-4 text-indigo-600" />
-                               <h4 className="text-xs font-black text-indigo-600 uppercase tracking-tight">Active Collector</h4>
-                             </div>
-                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Wallet holder has multiple digital assets indicating robust on-chain engagement.</p>
-                           </div>
-                        )}
-                        {parseFloat(alchemyData.balance || "0") > 0.1 && (
-                           <div className="p-4 rounded-[2rem] bg-amber-50 border border-amber-100 space-y-2">
-                             <div className="flex items-center gap-2">
-                               <Zap className="w-4 h-4 text-amber-600" />
-                               <h4 className="text-xs font-black text-amber-600 uppercase tracking-tight">High Liquidity</h4>
-                             </div>
-                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Wallet maintains healthy token balances for transaction gas and DeFi activities.</p>
-                           </div>
-                        )}
-                        {alchemyData.transactionCount > 10 && (
-                           <div className="p-4 rounded-[2rem] bg-blue-50 border border-blue-100 space-y-2">
-                             <div className="flex items-center gap-2">
-                               <Activity className="w-4 h-4 text-blue-600" />
-                               <h4 className="text-xs font-black text-blue-600 uppercase tracking-tight">Ecosystem Participant</h4>
-                             </div>
-                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Heavy transaction history shows active usage of Web3 infrastructure rather than just holding.</p>
-                           </div>
-                        )}
-                        {alchemyData.tokenDiversity > 3 && (
-                           <div className="p-4 rounded-[2rem] bg-pink-50 border border-pink-100 space-y-2">
-                             <div className="flex items-center gap-2">
-                               <Layers className="w-4 h-4 text-pink-600" />
-                               <h4 className="text-xs font-black text-pink-600 uppercase tracking-tight">Diversified Portfolio</h4>
-                             </div>
-                             <p className="text-[10px] text-slate-600 leading-relaxed font-medium italic">Holds multiple types of ERC-20 tokens showing advanced navigation of decentralized finance.</p>
-                           </div>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : alchemyData?.error ? (
-                  <div className="py-10 text-center space-y-2">
-                    <p className="text-sm text-red-500 font-bold bg-red-50 p-4 rounded-xl border border-red-100">{alchemyData.error}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Verify the wallet address starts with 0x and is valid on Ethereum Mainnet.</p>
-                  </div>
-                ) : (
-                  <div className="py-10 text-center">
-                    <p className="text-sm text-red-500 font-bold">Failed to load Web3 Insights.</p>
-                  </div>
-                )}
-
-                <div className="pt-6 border-t border-border flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Total Web3 Weighted Vector</div>
-                    <div className="text-3xl font-black text-foreground">
-                      {calculateCredibilityScore(profile).breakdown.crypto} <span className="text-sm text-muted-foreground">/ 40 Pts</span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setShowAlchemyInsights(false)}
-                    className="px-8 py-3 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20"
-                  >
-                    Close Report
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* LinkedIn Insights Modal */}
-      {/* Official Domain Insights Modal */}
-      <AnimatePresence>
-        {showDomainInsights && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowDomainInsights(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
-            >
-              <div className="p-8 md:p-12 space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-4 bg-blue-100 rounded-3xl text-blue-600 shadow-inner">
-                      <Globe className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-black text-foreground tracking-tight">Domain Intelligence</h2>
-                      <div className="flex items-center gap-2">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Institutional Protocol</span>
-                         <div className="h-1 w-1 rounded-full bg-slate-300" />
-                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Fully Verified</span>
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={() => setShowDomainInsights(false)} className="p-3 hover:bg-slate-100 rounded-full transition-colors border border-slate-100">
-                    <X className="w-6 h-6 text-slate-400" />
-                  </button>
-                </div>
-
-                {loadingDomain ? (
-                  <div className="py-20 flex flex-col items-center justify-center space-y-4">
-                    <div className="relative">
-                      <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Globe className="w-5 h-5 text-primary/50" />
-                      </div>
-                    </div>
-                    <p className="text-sm font-black text-slate-500 animate-pulse">Scanning Enterprise Infrastructure...</p>
-                  </div>
-                ) : domainData ? (
-                  <div className="space-y-8">
-                    <div className="flex flex-col md:flex-row gap-6 items-center bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                      <div className="relative">
-                         <div className="w-20 h-20 bg-white rounded-3xl shadow-lg border border-slate-100 flex items-center justify-center">
-                            <ShieldCheck className="w-10 h-10 text-emerald-500" />
-                         </div>
-                         <div className="absolute -bottom-2 -right-2 p-1.5 bg-blue-600 text-white rounded-lg shadow-lg">
-                            <Zap className="w-3 h-3" />
-                         </div>
-                      </div>
-                      <div className="flex-1 text-center md:text-left space-y-2">
-                        <div className="flex items-center justify-center md:justify-start gap-2">
-                           <h3 className="text-2xl font-black text-foreground tracking-tight">{domainData.domain}</h3>
-                           <ExternalLink className="w-4 h-4 text-slate-300" />
-                        </div>
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                           <div className="px-3 py-1 bg-emerald-500 text-white rounded-full text-[9px] font-black uppercase tracking-[0.1em] shadow-sm">
-                              {domainData.status}
-                           </div>
-                           <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border border-blue-100">
-                              {domainData.trustLevel} Trust Index
-                           </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[
-                        { label: "Organization Type", val: domainData.organization, icon: Users2 },
-                        { label: "Security Protocol", val: domainData.security, icon: ShieldCheck },
-                        { label: "Verification Date", val: domainData.verifiedAt, icon: Calendar },
-                        { label: "Domain Standing", val: "Excellent", icon: Star }
-                      ].map((stat, i) => (
-                        <div key={i} className="p-6 rounded-3xl bg-slate-50/50 border border-slate-100 hover:border-blue-200 transition-colors group">
-                           <div className="flex items-center gap-3 mb-2">
-                              <stat.icon className="w-4 h-4 text-blue-500 group-hover:scale-110 transition-transform" />
-                              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{stat.label}</span>
-                           </div>
-                           <div className="text-sm font-black text-slate-800">{stat.val}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="p-6 rounded-[2rem] bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-500/20">
-                       <div className="flex items-start gap-4">
-                          <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                             <Rocket className="w-5 h-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                             <h4 className="font-black text-sm mb-1 uppercase tracking-wider">Protocol Impact</h4>
-                             <p className="text-xs text-blue-50 leading-relaxed font-medium">
-                                Link confirmed via enterprise OTP. This verification adds a significant weight to your **Digital Professional Standing**, increasing your aggregate credibility score by **10 points**.
-                             </p>
-                          </div>
-                       </div>
-                    </div>
-                  </div>
-                ) : (
-                   <div className="py-20 text-center space-y-4">
-                      <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-                         <X className="w-10 h-10 text-red-500" />
-                      </div>
-                      <p className="text-sm font-bold text-red-500">Failed to generate Domain Insights.</p>
-                   </div>
-                )}
-
-                <div className="pt-8 border-t border-slate-100 flex justify-end">
-                  <button 
-                    onClick={() => setShowDomainInsights(false)}
-                    className="px-8 py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-slate-900/20"
-                  >
-                    Close Report
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showLeetcodeInsights && leetcodeData && (
-          <div className="fixed inset-0 z-[115] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowLeetcodeInsights(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
-            >
-              <div className="p-8 md:p-12 space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-4 bg-orange-50 rounded-3xl text-orange-600 shadow-inner border border-orange-100">
-                      <Code2 className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-black text-foreground tracking-tight">LeetCode Intelligence</h2>
-                      <div className="flex items-center gap-2">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Algorithmic Vector</span>
-                         <div className="h-1 w-1 rounded-full bg-slate-300" />
-                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">{getLeetCodeRank(leetcodeData.finalScore)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={() => setShowLeetcodeInsights(false)} className="p-3 hover:bg-slate-100 rounded-full transition-colors border border-slate-100">
-                    <X className="w-6 h-6 text-slate-400" />
-                  </button>
-                </div>
-
-                {loadingLeetcode ? (
-                  <div className="py-20 flex flex-col items-center justify-center space-y-4">
-                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                    <p className="text-sm font-black text-slate-500 animate-pulse">Computing Algorithmic Intelligence...</p>
-                  </div>
-                ) : leetcodeError ? (
-                  <div className="py-20 text-center space-y-4">
-                    <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-                        <X className="w-10 h-10 text-red-500" />
-                    </div>
-                    <p className="text-sm font-bold text-red-500">{leetcodeError}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-8">
-                    <div className="flex flex-col md:flex-row gap-6 items-center bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                      <div className="flex-1 text-center md:text-left space-y-2">
-                        <div className="flex items-center justify-center md:justify-start gap-2">
-                           <h3 className="text-2xl font-black text-foreground tracking-tight">@{leetcodeData.username}</h3>
-                           <ExternalLink className="w-4 h-4 text-slate-300" />
-                        </div>
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                           <div className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border border-orange-100">
-                              {leetcodeData.totalSolved} Solved
-                           </div>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Final Score</div>
-                        <div className="text-4xl font-black text-foreground">{leetcodeData.finalScore} <span className="text-lg text-slate-400">/ 100</span></div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="p-6 rounded-3xl bg-emerald-50/50 border border-emerald-100 hover:border-emerald-200 transition-colors group">
-                           <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">Easy</div>
-                           <div className="text-2xl font-black text-foreground">{leetcodeData.easy}</div>
-                        </div>
-                        <div className="p-6 rounded-3xl bg-amber-50/50 border border-amber-100 hover:border-amber-200 transition-colors group">
-                           <div className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Medium</div>
-                           <div className="text-2xl font-black text-foreground">{leetcodeData.medium}</div>
-                        </div>
-                        <div className="p-6 rounded-3xl bg-rose-50/50 border border-rose-100 hover:border-rose-200 transition-colors group">
-                           <div className="text-[10px] font-black uppercase tracking-widest text-rose-600 mb-1">Hard</div>
-                           <div className="text-2xl font-black text-foreground">{leetcodeData.hard}</div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Algorithmic Insights</h3>
-                      <div className="grid grid-cols-1 gap-3">
-                        {leetcodeData.insights.map((insight, i) => (
-                           <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                             <Lightbulb className="w-4 h-4 mt-0.5 text-orange-500 shrink-0" />
-                             <p className="text-xs font-semibold text-slate-700 leading-relaxed">{insight}</p>
-                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-                       <div>
-                          <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Credovia Protocol Contribution</div>
-                          <div className="text-2xl font-black text-foreground">
-                            +{Math.min(Math.round((leetcodeData.finalScore / 100) * 15), 15)} Points
-                          </div>
-                        </div>
-                      <button 
-                        onClick={() => setShowLeetcodeInsights(false)}
-                        className="px-8 py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-slate-900/20"
-                      >
-                        Close Report
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showLinkedinInsights && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowLinkedinInsights(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
-            >
-              <div className="p-8 space-y-8">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-4 bg-sky-50 rounded-2xl text-sky-700 border border-sky-100">
-                      <Linkedin className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-black text-foreground leading-tight">Career Intelligence</h2>
-                      <p className="text-sm text-muted-foreground font-medium italic">RapidAPI Intelligence</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setShowLinkedinInsights(false)}
-                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                  >
-                    <X className="w-6 h-6 text-muted-foreground" />
-                  </button>
-                </div>
-
-                {loadingLinkedin ? (
-                  <div className="py-20 flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
-                    <p className="text-sm font-bold text-muted-foreground tracking-widest uppercase">Scraping Professional Vector...</p>
-                  </div>
-                ) : linkedinData?.error ? (
-                  <div className="py-10 text-center space-y-2">
-                    <p className="text-sm text-red-500 font-bold bg-red-50 p-4 rounded-xl border border-red-100">{linkedinData.error}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Verify the LinkedIn URL is formatted correctly (e.g., linkedin.com/in/name).</p>
-                  </div>
-                ) : linkedinData ? (
-                  <>
-                    <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-6 rounded-[2rem] bg-slate-50 border border-slate-100">
-                      {linkedinData.photo ? (
-                        <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shrink-0">
-                          <img src={linkedinData.photo} alt={linkedinData.name} className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="w-24 h-24 rounded-full bg-blue-100 border-4 border-white shadow-lg shrink-0 flex items-center justify-center text-3xl font-black text-blue-600">
-                          {profile.name[0]}
-                        </div>
-                      )}
-                      
-                      <div className="space-y-2 text-center md:text-left flex-1">
-                        <div className="flex items-center gap-3">
-                           <h3 className="text-2xl font-black text-foreground">{linkedinData.name || profile.name}</h3>
-                           {(linkedinData.isVerified || profile.linkedin?.includes('verified')) && (
-                             <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm">
-                               <ShieldCheck className="w-2.5 h-2.5" />
-                               Verified Identity
-                             </div>
-                           )}
-                        </div>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-100/50 text-sky-800 rounded-full text-xs font-black uppercase tracking-widest border border-sky-200">
-                           <Award className="w-3.5 h-3.5" />
-                           {linkedinData.title || "Professional"}
-                        </div>
-                        <p className="text-sm text-muted-foreground font-medium flex items-center justify-center md:justify-start gap-2 pt-1">
-                          <Activity className="w-4 h-4" />
-                          @ {linkedinData.company}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-1">
-                        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Global Geography</div>
-                        <div className="text-sm font-black text-foreground">{linkedinData.location}</div>
-                      </div>
-                      <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 space-y-1">
-                        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Role Seniority</div>
-                        <div className="text-sm font-black text-foreground capitalize">{linkedinData.seniority || "Unknown"}</div>
-                      </div>
-                    </div>
-
-                    {linkedinData.skills && linkedinData.skills.length > 0 && (
-                      <div className="space-y-3">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Verified Skill Vectors</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {linkedinData.skills.map((skill: string, i: number) => (
-                             <span key={i} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200">
-                               {skill}
-                             </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="py-10 text-center">
-                    <p className="text-sm text-red-500 font-bold">Failed to load Professional Insights.</p>
-                  </div>
-                )}
-
-                <div className="pt-6 border-t border-border flex justify-end">
-                  <button 
-                    onClick={() => setShowLinkedinInsights(false)}
-                    className="px-8 py-3 bg-sky-600 text-white font-black rounded-2xl hover:bg-sky-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-sky-600/20"
-                  >
-                    Close Report
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Insight Modals - Extracted for code organization */}
+      <InsightModals
+        profile={profile}
+        showGithubInsights={showGithubInsights}
+        setShowGithubInsights={setShowGithubInsights}
+        githubStats={githubStats}
+        showAlchemyInsights={showAlchemyInsights}
+        setShowAlchemyInsights={setShowAlchemyInsights}
+        loadingAlchemy={loadingAlchemy}
+        alchemyData={alchemyData}
+        showDomainInsights={showDomainInsights}
+        setShowDomainInsights={setShowDomainInsights}
+        loadingDomain={loadingDomain}
+        domainData={domainData}
+        showLeetcodeInsights={showLeetcodeInsights}
+        setShowLeetcodeInsights={setShowLeetcodeInsights}
+        loadingLeetcode={loadingLeetcode}
+        leetcodeData={leetcodeData}
+        leetcodeError={leetcodeError}
+        showLinkedinInsights={showLinkedinInsights}
+        setShowLinkedinInsights={setShowLinkedinInsights}
+        loadingLinkedin={loadingLinkedin}
+        linkedinData={linkedinData}
+      />
 
       {/* Custom Verification Input Modal */}
       <AnimatePresence>
@@ -1693,7 +1028,7 @@ function DashboardContent() {
                                   : "name@company.com"
                         }
                         disabled={isSubmittingSync}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400 text-foreground"
                       />
                     </div>
                   ) : (
@@ -1710,7 +1045,7 @@ function DashboardContent() {
                           placeholder="000000"
                           maxLength={6}
                           disabled={isSubmittingSync}
-                          className="w-full px-6 py-4 pl-12 bg-blue-50/50 border border-blue-100 rounded-2xl text-center text-xl font-black tracking-[0.4em] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300"
+                          className="w-full px-6 py-4 pl-12 bg-blue-50/50 border border-blue-100 rounded-2xl text-center text-xl font-black tracking-[0.4em] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400 text-foreground"
                         />
                       </div>
                       <p className="text-[9px] text-center text-muted-foreground italic">Check your official inbox for the verification token.</p>

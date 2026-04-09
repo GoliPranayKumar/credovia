@@ -29,17 +29,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const initialized = useRef(false);
 
-  // Helper function for synchronization
+  // Synchronize identities with external platforms
   const performSync = useCallback(async (session: any, currentProfile: any) => {
     try {
-      console.log("DEBUG: performSync started...");
       let identities;
       try {
         identities = await account.listIdentities();
-        console.log("DEBUG: Identities found:", identities.identities.length, identities.identities);
       } catch (idErr) {
-        console.warn("DEBUG: listIdentities failed, this might happen on fresh logins:", idErr);
-        // Fallback: If listIdentities fails but we have a session, we can't sync identities yet
         return currentProfile;
       }
       
@@ -50,9 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let needsUpdate = false;
 
       if (githubId) {
-        console.log("DEBUG: Processing GitHub identity link...");
-        
-        // Ensure we at least mark it as connected even if API fails
         if (!currentProfile.github) {
           updateData.github = `https://github.com/appwrite-verified-user-${githubId.providerUid}`;
           needsUpdate = true;
@@ -64,7 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const ghData = await ghRes.json();
             if (ghData.login) {
               const verifiedUrl = `https://github.com/${ghData.login}`;
-              console.log("DEBUG: GitHub User found:", ghData.login);
               
               let totalStars = 0;
               let totalCommits = 0;
@@ -83,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 totalCommits = commuteData.total_count || 0;
                 totalPRs = prData.total_count || 0;
               } catch (err) {
-                console.warn("DEBUG: Detailed GitHub stats failed (likely rate limit):", err);
+                // Silently skip detailed stats if rate-limited
               }
 
               Object.assign(updateData, {
@@ -101,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (e) {
-          console.error("DEBUG: GitHub core sync API error:", e);
+          console.error("GitHub sync error:", e);
         }
       }
 
@@ -115,7 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { total: newScore } = calculateCredibilityScore({ ...currentProfile, ...updateData });
         updateData.score = newScore;
 
-        console.log("DEBUG: Applying updates to database...");
         return await withRetry(() => 
           databases.updateDocument(
             DATABASE_ID,
@@ -127,14 +118,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return currentProfile;
     } catch (e) {
-      console.error("DEBUG: performSync global error:", e);
+      console.error("performSync error:", e);
       return currentProfile;
     }
   }, []);
 
   const checkAuth = useCallback(async (forceSync = false) => {
     try {
-      // Add a tiny delay if we're coming from an OAuth redirect to ensure cookies are ready
       const isOauthReturn = typeof window !== 'undefined' && 
         (window.location.search.includes('sync=') || window.location.search.includes('oauth'));
       
@@ -146,7 +136,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         session = await account.get();
       } catch (err: any) {
-        // One-time retry for OAuth returns
         if (isOauthReturn && (err.code === 401 || err.code === 403)) {
           await new Promise(resolve => setTimeout(resolve, 1500));
           session = await account.get();
@@ -155,7 +144,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      console.log("DEBUG: Active Session User:", session);
       setUser(session);
       
       const response = await withRetry(() => 
@@ -168,19 +156,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (response.documents.length > 0) {
         let currentProfile = response.documents[0];
-        
         const syncParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('sync') === 'true';
         const lastSync = localStorage.getItem(`last-sync-${session.$id}`);
         const shouldSync = forceSync || syncParam || !lastSync || Date.now() - parseInt(lastSync) > 300000;
 
         if (shouldSync) {
-          console.log("DEBUG: Proceeding with sync check...");
           currentProfile = await performSync(session, currentProfile);
           localStorage.setItem(`last-sync-${session.$id}`, Date.now().toString());
         }
         setProfile(currentProfile);
       } else {
-        console.log("DEBUG: No profile found, creating new one...");
         const newProfile = await withRetry(() => 
           databases.createDocument(
             DATABASE_ID,
@@ -204,9 +189,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(syncedProfile);
       }
     } catch (error: any) {
-      console.warn("DEBUG: checkAuth error caught:", error.code, error.message);
       if (error.code !== 401 && error.code !== 403) {
-        console.error("DEBUG: Auth check failed with unexpected error:", error);
+        console.error("Auth check failed:", error);
       }
       setUser(null);
       setProfile(null);
@@ -226,14 +210,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       await account.createEmailPasswordSession(email, pass);
-      await checkAuth(true); // Force sync on login
+      await checkAuth(true);
     } finally {
       setLoading(false);
     }
   };
 
   const loginWithGithub = async () => {
-    console.log("DEBUG: Initiating GitHub SSO...");
     try {
       account.createOAuth2Session(
         OAuthProvider.Github,
@@ -241,13 +224,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         `${window.location.origin}/login?error=github_failed`
       );
     } catch (err) {
-      console.error("DEBUG: GitHub SSO failed:", err);
-      alert("Failed to start GitHub login. Please check your connection.");
+      alert("Failed to start GitHub login.");
     }
   };
 
   const loginWithLinkedin = async () => {
-    console.log("DEBUG: Initiating LinkedIn SSO...");
     try {
       account.createOAuth2Session(
         OAuthProvider.Linkedin,
@@ -255,8 +236,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         `${window.location.origin}/login`
       );
     } catch (err) {
-      console.error("DEBUG: LinkedIn SSO failed:", err);
-      alert("Failed to start LinkedIn login. Please check your connection.");
+      alert("Failed to start LinkedIn login.");
     }
   };
 
@@ -280,10 +260,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      // Safe delete: only try to delete if there is an active session
-      try {
-        await account.deleteSession("current");
-      } catch (e) { /* Ignore if no session exists */ }
+      await account.deleteSession("current");
+    } catch (e) { 
+      // Safe fail
     } finally {
       setUser(null);
       setProfile(null);
@@ -307,9 +286,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = await account.createEmailToken(userId, email);
       return token.userId;
     } catch (err: any) {
-      if (err.code === 404) {
-        throw new Error("Account not found. Please sign up first.");
-      }
+      if (err.code === 404) throw new Error("Account not found. Please sign up first.");
       throw err;
     }
   };
@@ -320,13 +297,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const session = await account.createSession(userId, secret);
         setUser(session);
-        await checkAuth(true); // Sync profile
+        await checkAuth(true);
       } catch (err: any) {
-        // If session already exists, we might need to delete it first
         if (err.code === 401 || err.code === 403 || err.message?.includes("active")) {
            try {
              await account.deleteSession("current");
-           } catch (e) { /* silent fail if no session */ }
+           } catch (e) {}
            const session = await account.createSession(userId, secret);
            setUser(session);
            await checkAuth(true);

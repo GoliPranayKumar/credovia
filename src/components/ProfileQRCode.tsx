@@ -61,22 +61,23 @@ export function ProfileQRCode({ profileId, name }: ProfileQRCodeProps) {
         Share QR
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
-          >
+      {open && typeof document !== "undefined" && require("react-dom").createPortal(
+        <AnimatePresence>
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm overflow-y-auto no-scrollbar pointer-events-auto">
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0"
+              onClick={() => setOpen(false)}
+            />
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#0a0a0a] rounded-[2rem] border border-white/10 shadow-2xl p-8 w-full max-w-sm space-y-6"
+              className="relative z-10 bg-[#0a0a0a] rounded-[2rem] border border-white/10 shadow-2xl p-8 w-full max-w-sm space-y-6"
             >
               {/* Header */}
               <div className="flex items-center justify-between">
@@ -126,9 +127,10 @@ export function ProfileQRCode({ profileId, name }: ProfileQRCodeProps) {
                 Download QR Code
               </button>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }
