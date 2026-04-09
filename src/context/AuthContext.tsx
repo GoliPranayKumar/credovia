@@ -33,8 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const performSync = useCallback(async (session: any, currentProfile: any) => {
     try {
       console.log("DEBUG: performSync started...");
-      const identities = await account.listIdentities();
-      console.log("DEBUG: Identities found:", identities.identities.length, identities.identities);
+      let identities;
+      try {
+        identities = await account.listIdentities();
+        console.log("DEBUG: Identities found:", identities.identities.length, identities.identities);
+      } catch (idErr) {
+        console.warn("DEBUG: listIdentities failed, this might happen on fresh logins:", idErr);
+        // Fallback: If listIdentities fails but we have a session, we can't sync identities yet
+        return currentProfile;
+      }
       
       const githubId = identities.identities.find(i => i.provider === "github");
       const linkedinId = identities.identities.find(i => i.provider === "linkedin");
@@ -136,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         let currentProfile = response.documents[0];
         
         const syncParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('sync') === 'true';
-        const lastSync = localStorage.getCacheData ? null : localStorage.getItem(`last-sync-${session.$id}`);
+        const lastSync = localStorage.getItem(`last-sync-${session.$id}`);
         const shouldSync = forceSync || syncParam || !lastSync || Date.now() - parseInt(lastSync) > 300000;
 
         if (shouldSync) {
@@ -170,8 +177,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(syncedProfile);
       }
     } catch (error: any) {
+      console.warn("DEBUG: checkAuth error caught:", error.code, error.message);
       if (error.code !== 401 && error.code !== 403) {
-        console.error("DEBUG: Auth check failed:", error);
+        console.error("DEBUG: Auth check failed with unexpected error:", error);
       }
       setUser(null);
       setProfile(null);
@@ -203,7 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       account.createOAuth2Session(
         OAuthProvider.Github,
         `${window.location.origin}/dashboard?sync=true`,
-        `${window.location.origin}/login`
+        `${window.location.origin}/login?error=github_failed`
       );
     } catch (err) {
       console.error("DEBUG: GitHub SSO failed:", err);
