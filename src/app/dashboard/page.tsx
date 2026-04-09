@@ -46,7 +46,10 @@ import {
   Trophy as TrophyIcon,
   GitPullRequest,
   Users,
-  Mail
+  Mail,
+  Save,
+  LogOut,
+  Edit3
 } from "lucide-react";
 import { InsightModals } from "@/components/dashboard/InsightModals";
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite";
