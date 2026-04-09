@@ -12,7 +12,7 @@ export default function Home() {
   const { loginWithGithub } = useAuth();
   
   return (
-    <div className="space-y-32">
+    <div className="space-y-16 md:space-y-32 overflow-x-hidden">
       {/* Hero Section */}
       <section className="relative pt-4 lg:pt-8 pb-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
         
@@ -31,9 +31,9 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-7xl font-black tracking-tight leading-[1.1]"
+            className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.1] text-foreground"
           >
-            Your Reputation in <br />
+            Your Reputation in <br className="hidden sm:block" />
             <span>
               <span>A Single </span>
               <span className="text-primary">Number.</span>
@@ -140,7 +140,7 @@ export default function Home() {
 
       {/* Engine Documentation Section */}
       <section className="pt-12 pb-8">
-         <div className="bg-[#0a0a0a] rounded-[2.5rem] border border-white/5 p-8 md:p-12 shadow-2xl relative overflow-hidden group">
+         <div className="bg-[#0a0a0a] rounded-[2rem] md:rounded-[2.5rem] border border-white/5 p-6 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden group">
             {/* Ambient Background Glow */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />

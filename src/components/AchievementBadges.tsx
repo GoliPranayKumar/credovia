@@ -161,7 +161,7 @@ export function AchievementBadges({ score, profile, breakdown }: AchievementBadg
   }, []);
 
   return (
-    <section className="p-8 rounded-[2.5rem] glass border-border bg-white shadow-sm space-y-6">
+    <section className="p-5 sm:p-8 rounded-[2rem] md:rounded-[2.5rem] glass border-border bg-white shadow-sm space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ export function AchievementBadges({ score, profile, breakdown }: AchievementBadg
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08, duration: 0.4 }}
               className={cn(
-                "relative flex flex-col items-center text-center p-5 rounded-[2rem] border transition-all cursor-default group",
+                "relative flex flex-col items-center text-center p-3 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] border transition-all cursor-default group",
                 badge.earned
                   ? `${badge.bgColor} ${badge.borderColor} shadow-lg ${badge.glowColor} hover:scale-105`
                   : "bg-muted/30 border-border/40 opacity-40 grayscale"

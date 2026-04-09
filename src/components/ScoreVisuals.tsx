@@ -74,7 +74,7 @@ export function ScoreRadarChart({ breakdown }: { breakdown: any }) {
   ];
 
   return (
-    <div className="h-[280px] w-full min-w-0 bg-transparent rounded-[2.5rem] p-6 border border-white/10 relative overflow-hidden group">
+    <div className="h-[240px] md:h-[280px] w-full min-w-0 bg-transparent rounded-[2rem] md:rounded-[2.5rem] p-4 md:p-6 border border-white/10 relative overflow-hidden group">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
@@ -103,7 +103,7 @@ export function ScoreBarComparison({ breakdown }: { breakdown: any }) {
   ].sort((a, b) => (a.current / a.max) - (b.current / b.max)); // Sort by efficiency percentage
 
   return (
-    <div className="h-[250px] w-full min-w-0 bg-transparent rounded-[2.5rem] p-6 border border-white/10">
+    <div className="h-[210px] md:h-[250px] w-full min-w-0 bg-transparent rounded-[2rem] md:rounded-[2.5rem] p-4 md:p-6 border border-white/10">
       <h5 className="text-[10px] font-black uppercase text-indigo-400 mb-4 tracking-widest">Efficiency Ranking</h5>
       <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <BarChart layout="vertical" data={data} margin={{ left: 15, right: 30 }}>
@@ -139,7 +139,7 @@ export function TrustEvolutionChart() {
   ];
 
   return (
-    <div className="h-[200px] w-full min-w-0 bg-transparent rounded-[2.5rem] p-6 border border-white/10">
+    <div className="h-[180px] md:h-[200px] w-full min-w-0 bg-transparent rounded-[2rem] md:rounded-[2.5rem] p-4 md:p-6 border border-white/10">
       <h5 className="text-[10px] font-black uppercase text-blue-400 mb-4 tracking-widest">Trust Index Projection</h5>
       <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <AreaChart data={data}>
@@ -168,7 +168,7 @@ export function ParameterGauge({ label, value, max, color, icon: Icon }: { label
   ];
 
   return (
-    <div className="flex flex-col items-center gap-3 p-5 rounded-[2.5rem] bg-neutral-900/50 border border-white/5 group hover:border-white/20 hover:shadow-lg hover:shadow-white/5 transition-all cursor-default">
+    <div className="flex flex-col items-center gap-3 p-3 sm:p-5 rounded-[2rem] bg-neutral-900/50 border border-white/5 group hover:border-white/20 hover:shadow-lg hover:shadow-white/5 transition-all cursor-default">
       <div className="h-[75px] w-[75px] relative shrink-0">
         <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <PieChart>
@@ -212,7 +212,7 @@ export function ScoreGauge({ score }: { score: number }) {
   ];
 
   return (
-    <div className="h-[180px] w-[180px] relative min-w-0 min-h-0">
+    <div className="h-[140px] w-[140px] md:h-[180px] md:w-[180px] relative min-w-0 min-h-0">
       <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <PieChart>
           <Pie
@@ -249,8 +249,8 @@ export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    <div className="space-y-6 md:space-y-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
         {items.map((item, i) => (
           <ParameterGauge 
             key={i}
@@ -273,10 +273,10 @@ export function ScoreBreakdownView({ breakdown }: { breakdown: any }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div className="md:col-span-2 bg-transparent p-6 rounded-[2.5rem] border border-white/10 shadow-sm">
+        <div className="md:col-span-2 bg-transparent p-4 sm:p-6 rounded-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-sm">
           <TrustEvolutionChart />
         </div>
-        <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/20 rounded-[2.5rem] border border-indigo-500/20 p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-sm group">
+        <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/20 rounded-[2rem] md:rounded-[2.5rem] border border-indigo-500/20 p-6 md:p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-sm group">
            <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center shadow-inner border border-blue-500/20 group-hover:border-blue-400/40 transition-colors">
               <Zap className="w-8 h-8 text-blue-400" />
            </div>

@@ -66,9 +66,9 @@ export function InsightModals({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-border"
             >
-              <div className="p-8 space-y-8">
+              <div className="p-5 sm:p-8 space-y-6 sm:space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div className="flex items-center justify-between">
                   {/* ... same as before, extracted ... */}
                   <div className="flex items-center gap-4">
@@ -166,7 +166,7 @@ export function InsightModals({
                   </div>
                   <button 
                     onClick={() => setShowGithubInsights(false)}
-                    className="px-8 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-600 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-primary/20"
+                    className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-600 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-primary/20"
                   >
                     Close Report
                   </button>
@@ -193,9 +193,9 @@ export function InsightModals({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-border"
             >
-              <div className="p-8 space-y-8">
+              <div className="p-5 sm:p-8 space-y-6 sm:space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-800 border border-indigo-100">
@@ -333,7 +333,7 @@ export function InsightModals({
                   </div>
                   <button 
                     onClick={() => setShowAlchemyInsights(false)}
-                    className="px-8 py-3 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20"
+                    className="w-full sm:w-auto px-8 py-3 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20"
                   >
                     Close Report
                   </button>
@@ -360,9 +360,9 @@ export function InsightModals({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-border"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-border"
             >
-              <div className="p-8 space-y-8">
+              <div className="p-5 sm:p-8 space-y-6 sm:space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="p-4 bg-sky-50 rounded-2xl text-sky-700 border border-sky-100">
@@ -422,10 +422,10 @@ export function InsightModals({
                   </div>
                 )}
 
-                <div className="pt-6 border-t border-border flex justify-end">
+                <div className="pt-6 border-t border-border flex justify-center sm:justify-end">
                   <button 
                     onClick={() => setShowLinkedinInsights(false)}
-                    className="px-8 py-3 bg-sky-600 text-white font-black rounded-2xl hover:bg-sky-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-sky-600/20"
+                    className="w-full sm:w-auto px-8 py-3 bg-sky-600 text-white font-black rounded-2xl hover:bg-sky-700 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-sky-600/20"
                   >
                     Close Report
                   </button>
@@ -451,7 +451,7 @@ export function InsightModals({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
             >
               <div className="p-8 md:p-12 space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
                 {/* ... Domain content ... */}
@@ -487,7 +487,7 @@ export function InsightModals({
                   </div>
                 ) : null}
 
-                <div className="pt-8 border-t border-slate-100 flex justify-end">
+                <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-4">
                   <button 
                     onClick={() => setShowDomainInsights(false)}
                     className="px-8 py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-xl shadow-slate-900/20"
@@ -516,7 +516,7 @@ export function InsightModals({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
             >
               <div className="p-8 md:p-12 space-y-8 max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div className="flex items-center justify-between">
@@ -549,7 +549,7 @@ export function InsightModals({
                     </div>
                 </div>
 
-                <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="text-2xl font-black text-foreground">
                       Score: {leetcodeData.finalScore} / 100
                     </div>

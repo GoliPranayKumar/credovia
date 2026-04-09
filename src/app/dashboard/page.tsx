@@ -472,7 +472,7 @@ function DashboardContent() {
   ] : [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 text-foreground">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 space-y-8 text-foreground min-h-screen">
       {/* Email Verification Banner */}
       {user && !user.emailVerification && (
         <motion.div 
@@ -519,7 +519,7 @@ function DashboardContent() {
       </div>
 
       {/* Top Section: Verification Hub (Full Width) */}
-      <section className="relative overflow-hidden p-6 md:p-10 rounded-[2.5rem] glass border-border/50 bg-gradient-to-br from-blue-50/50 via-transparent to-blue-50/10">
+      <section className="relative overflow-hidden p-6 sm:p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] glass border-border/50 bg-gradient-to-br from-blue-50/50 via-transparent to-blue-50/10">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-blue-100/50 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -639,11 +639,11 @@ function DashboardContent() {
       </section>
 
       {/* Grid Layout: Main Dashboard Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-12 lg:gap-8 items-stretch relative box-border w-full">
         
         {/* Identity & Reputation Card (Left / 4 cols) */}
-        <aside className="lg:col-span-4 space-y-6 sticky top-6">
-          <section className="p-6 md:p-8 rounded-[2.5rem] glass border-border bg-white space-y-6 flex flex-col items-center text-center shadow-sm">
+        <aside className="block w-full lg:col-span-4 space-y-6 relative lg:sticky lg:top-6 z-10 h-fit">
+          <section className="p-5 sm:p-8 rounded-[2rem] md:rounded-[2.5rem] glass border-border bg-white space-y-6 flex flex-col items-center text-center shadow-sm">
             <div className="space-y-1">
               <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-600/60">Live Reputation</h3>
               <h2 className="text-xl font-black text-foreground">Score Matrix</h2>
@@ -721,7 +721,7 @@ function DashboardContent() {
           </section>
 
           {/* New: Protocol Telemetry Card to fill space */}
-          <section className="p-6 rounded-[2rem] bg-indigo-900/5 border border-indigo-200/20 space-y-4">
+          <section className="p-5 sm:p-6 rounded-[2rem] bg-indigo-900/5 border border-indigo-200/20 space-y-4">
              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -761,7 +761,7 @@ function DashboardContent() {
              </div>
           </section>
 
-          <section className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-200/20 space-y-3">
+          <section className="p-5 sm:p-6 rounded-[2rem] bg-amber-500/5 border border-amber-200/20 space-y-3">
              <div className="flex items-center gap-2">
                 <TrophyIcon className="w-3.5 h-3.5 text-amber-500" />
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-900/40">Next Milestone</span>
@@ -774,7 +774,7 @@ function DashboardContent() {
         </aside>
 
         {/* Pictorial Analysis (Right / 8 cols) */}
-        <main className="lg:col-span-8 space-y-6">
+        <main className="block w-full lg:col-span-8 space-y-8 relative">
           <AnimatePresence mode="wait">
             {isEditing ? (
               <motion.form 
@@ -783,7 +783,7 @@ function DashboardContent() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 onSubmit={handleSave} 
-                className="p-8 rounded-[2.5rem] glass border-border bg-white space-y-6 shadow-sm"
+                className="p-5 sm:p-8 rounded-[2rem] md:rounded-[2.5rem] glass border-border bg-white space-y-6 shadow-sm"
               >
                 <div className="space-y-1">
                   <h3 className="text-2xl font-black text-foreground">Meta Update</h3>
@@ -873,7 +873,7 @@ function DashboardContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="p-8 rounded-[2.5rem] glass border-border bg-white space-y-8 shadow-sm relative overflow-hidden"
+                className="p-5 sm:p-8 rounded-[2rem] md:rounded-[2.5rem] glass border-border bg-white space-y-8 shadow-sm relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-6 opacity-30">
                    <div className="flex gap-1.5">
@@ -917,7 +917,7 @@ function DashboardContent() {
               { label: "Protocol Rank", val: "Alpha Elite", desc: "TIER INDEX", icon: Award, color: "text-indigo-400", border: "border-indigo-500/20", bg: "bg-indigo-500/5", glow: "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.1)]" },
               { label: "Growth Vector", val: "+14.2%", desc: "CREDIBILITY PULSE", icon: TrendingUp, color: "text-emerald-400", border: "border-emerald-500/20", bg: "bg-emerald-500/5", glow: "group-hover:shadow-[0_0_30px_rgba(16,185,129,0.1)]" },
             ].map((stat, i) => (
-              <div key={i} className={`p-8 rounded-[2.5rem] border ${stat.border} bg-neutral-900/40 backdrop-blur-md space-y-4 group hover:border-white/20 transition-all ${stat.glow} relative overflow-hidden`}>
+              <div key={i} className={`p-5 sm:p-8 rounded-[2rem] md:rounded-[2.5rem] border ${stat.border} bg-neutral-900/40 backdrop-blur-md space-y-4 group hover:border-white/20 transition-all ${stat.glow} relative overflow-hidden`}>
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
                    <stat.icon className="w-20 h-20 rotate-12" />
                 </div>
@@ -945,10 +945,10 @@ function DashboardContent() {
       </div>
 
       {/* Footer Meta */}
-      <footer className="pt-8 text-center pb-12 border-t border-border mx-10">
+      <footer className="pt-12 text-center pb-24 border-t border-border mx-4 sm:mx-10 mt-12">
         <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.5em]">
           Credovia Protocol • v1.0.4-Stable
-        </p>
+        </p>  
       </footer>
 
       {/* Insight Modals - Extracted for code organization */}
